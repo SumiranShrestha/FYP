@@ -1,0 +1,107 @@
+/* Basic resets and custom styles */
+
+/* Adjust card images for consistent sizing */
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+}
+
+/* Price filter range style (optional) */
+input[type="range"] {
+    accent-color: #28a745;
+    /* change slider color if desired */
+}
+
+/* Navigation link hover effect */
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+
+.thumbnail-small {
+    width: 80px;
+    height: 90px;
+    object-fit: cover;
+}
+
+.cart-item-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+
+
+/* Hero Banner */
+.hero-banner {
+    height: 400px;
+    background: url('/images/hero-banner.jpg') no-repeat center center/cover;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* Shop By Category Section */
+.shop-by-category-section {
+    background-color: #eafaf1;
+    padding: 40px 0;
+}
+
+.shop-by-category-section h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.category-item {
+    text-align: center;
+}
+
+.category-item img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.category-item img:hover {
+    transform: scale(1.05);
+}
+
+.category-item h5 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.category-item a {
+    color: #000000;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.category-item a:hover {
+    text-decoration: underline;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+}
+
+.thumbnail:hover {
+    transform: scale(1.1);
+}
+
+.card-img-top {
+    transition: transform 0.3s ease-in-out;
+}
+
+.card-img-top:hover {
+    transform: scale(1.05);
+}
