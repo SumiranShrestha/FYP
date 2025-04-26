@@ -101,6 +101,20 @@ if (!isset($_SESSION["admin_logged_in"])) {
                 </div>
             </div>
 
+            <!-- Orders Management Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="bi bi-cart-check text-primary" style="font-size: 3rem;"></i>
+                        <h5 class="card-title mt-3">Manage Orders</h5>
+                        <p class="card-text">View, process, and update customer orders.</p>
+                        <a href="manage_orders.php" class="btn btn-primary">
+                            <i class="bi bi-cart-check me-1"></i>Manage Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             <!-- FAQ Management Card -->
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">

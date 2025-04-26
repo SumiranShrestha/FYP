@@ -208,12 +208,29 @@ if (isset($_SESSION["user_id"])) {
                         </a>
                     <?php endif; ?>
 
-                    <a href="server/logout.php" class="btn btn-outline-danger">Logout</a>
+                    <!-- Logout Button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-danger">Logout</button>
                 <?php endif; ?>
             </div>
         </div>
     </div>
 </header>
+
+<!-- ✅ Logout Confirmation Modal (custom, matches image) -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+            <div class="modal-body text-center py-4">
+                <h5 class="fw-bold mb-3">Logout</h5>
+                <div class="mb-4">Are you sure you want to logout?</div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal" id="cancelLogoutBtn">Cancel</button>
+                    <button type="button" class="btn btn-primary px-4" id="confirmLogoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ✅ Login Modal -->
 <div class="modal fade" id="loginModal" tabindex="-1">
@@ -228,6 +245,27 @@ if (isset($_SESSION["user_id"])) {
                     <input type="email" name="email" class="form-control mb-3" placeholder="Email" required>
                     <input type="password" name="password" class="form-control mb-3" placeholder="Password" required>
                     <button type="submit" class="btn btn-primary w-100">Log In</button>
+                </form>
+                <div class="text-center mt-3">
+                    <a href="otp/forgot_password.php" class="text-decoration-none">Forgot Password?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Forgot Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="forgotPasswordForm" action="otp/forgot_password.php" method="POST">
+                    <input type="email" name="email" class="form-control mb-3" placeholder="Enter your registered email" required>
+                    <button type="submit" class="btn btn-primary w-100">Reset Password</button>
                 </form>
             </div>
         </div>
@@ -268,6 +306,10 @@ if (isset($_SESSION["user_id"])) {
                     <input type="password" name="password" class="form-control mb-3" placeholder="Password" required>
                     <button type="submit" class="btn btn-primary w-100">Login as Doctor</button>
                 </form>
+                <!-- Added Forgot Password link for doctor login -->
+                <div class="text-center mt-3">
+                    <a href="otp/forgot_password.php" class="text-decoration-none">Forgot Password?</a>
+                </div>
             </div>
         </div>
     </div>
@@ -400,6 +442,19 @@ if (isset($_SESSION["user_id"])) {
                 }
             });
         });
+
+        // Logout confirmation logic
+        $("#logoutBtn").on("click", function(e) {
+            e.preventDefault();
+            $("#logoutConfirmModal").modal("show");
+        });
+        $("#confirmLogoutBtn").on("click", function() {
+            window.location.href = "server/logout.php";
+        });
+        // Optional: close modal on cancel (already handled by data-bs-dismiss)
+        // $("#cancelLogoutBtn").on("click", function() {
+        //     $("#logoutConfirmModal").modal("hide");
+        // });
 
     });
 </script>

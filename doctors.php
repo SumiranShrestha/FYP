@@ -109,7 +109,6 @@ $conn->close();
                                     <span class="badge bg-<?= $is_available ? 'success' : 'danger' ?> availability-badge">
                                         <?= $availability_display ?>
                                     </span>
-                                    
                                     <?php if ($is_available): ?>
                                         <div class="availability-times mt-2">
                                             <?php foreach ($availability_details as $day => $times): ?>
@@ -120,13 +119,18 @@ $conn->close();
                                             <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
-                                    
                                     <div class="mt-3">
                                         <?php if ($is_available): ?>
-                                            <a href="book_appointment.php?doctor_id=<?= $doctor['id'] ?>" 
-                                               class="btn btn-primary w-100">
-                                               Book Appointment
-                                            </a>
+                                            <?php if (isset($_SESSION['user_id']) && (empty($_SESSION['user_type']) || $_SESSION['user_type'] === 'user')): ?>
+                                                <a href="book_appointment.php?doctor_id=<?= $doctor['id'] ?>" 
+                                                   class="btn btn-primary w-100 bookAppointmentBtn">
+                                                   Book Appointment
+                                                </a>
+                                            <?php else: ?>
+                                                <button class="btn btn-primary w-100 bookAppointmentBtn" type="button">
+                                                    Book Appointment
+                                                </button>
+                                            <?php endif; ?>
                                         <?php else: ?>
                                             <button class="btn btn-secondary w-100" disabled>
                                                 Currently Unavailable
@@ -145,5 +149,57 @@ $conn->close();
     <?php include("footer.php"); ?>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+    #loginToast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+        min-width: 280px;
+    }
+    #loginToast.toast {
+        background-color: #e53935 !important;
+        color: #fff !important;
+
+    }
+    </style>
+    <!-- Toast for login required -->
+    <div class="toast align-items-center border-0" id="loginToast" role="alert" aria-live="assertive" aria-atomic="true" style="display:none;">
+      <div class="d-flex">
+        <div class="toast-body">
+          You must login to book appointment.
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.bookAppointmentBtn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                <?php if (!isset($_SESSION['user_id']) || (!empty($_SESSION['user_type']) && $_SESSION['user_type'] !== 'user')): ?>
+                    e.preventDefault();
+                    // Show toast at bottom right
+                    var toastEl = document.getElementById('loginToast');
+                    toastEl.style.display = 'block';
+                    var toast = new bootstrap.Toast(toastEl, { delay: 1200 });
+                    toast.show();
+                    // After toast, open login modal
+                    setTimeout(function() {
+                        toast.hide();
+                        // If you have a login modal with id 'loginModal'
+                        var loginModal = document.getElementById('loginModal');
+                        if (loginModal) {
+                            var modal = new bootstrap.Modal(loginModal);
+                            modal.show();
+                        } else {
+                            window.location.href = "login.php";
+                        }
+                    }, 1800);
+                <?php endif; ?>
+                // If logged in as user, allow booking (do nothing)
+            });
+        });
+    });
+    </script>
 </body>
 </html>

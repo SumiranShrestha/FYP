@@ -87,17 +87,81 @@ $purchase_order_name = 'Shady Shades Order';
       font-size: 1.2rem;
     }
     .order-summary {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 1rem;
+      border: 1px solid #eee;
+      border-radius: 16px;
+      padding: 1.5rem 1.5rem 1rem 1.5rem;
+      background: #fff;
+      box-shadow: 0 2px 16px 0 rgba(0,0,0,0.04);
     }
     .order-summary .order-item img {
       width: 64px;
-      height: auto;
+      height: 64px;
       object-fit: cover;
+      border-radius: 8px;
     }
-    .place-order-btn {
+    .order-summary .order-item {
+      position: relative;
+    }
+    .order-summary .order-item .item-qty-badge {
+      position: absolute;
+      top: -8px;
+      left: 48px;
+      background:rgb(212, 66, 195);
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border: 2px solid #fff;
+    }
+    .order-summary hr {
+      margin: 1rem 0;
+    }
+    .order-summary .promo-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .order-summary .promo-row input {
+      flex: 1;
+    }
+    .order-summary .promo-row button {
+      min-width: 80px;
+      background: #10b6c6;
+      color: #fff;
+      border: none;
+      font-weight: 600;
+    }
+    .order-summary .promo-row button:disabled {
+      opacity: 0.7;
+    }
+    .order-summary .summary-label {
+      color: #222;
+    }
+    .order-summary .summary-value {
+      font-weight: 500;
+    }
+    .order-summary .fw-bold {
+      font-weight: 700 !important;
+    }
+    .order-summary .place-order-btn {
+      margin-top: 1rem;
       width: 100%;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      background: #10b6c6;
+      border: none;
+      color: #fff;
+      padding: 0.75rem 0;
+      transition: background 0.2s;
+    }
+    .order-summary .place-order-btn:hover {
+      background: #0e9bb0;
     }
     /* Payment card styles */
     .payment-options {
@@ -110,16 +174,99 @@ $purchase_order_name = 'Shady Shades Order';
     .payment-card .card {
       cursor: pointer;
       transition: border-color 0.2s, box-shadow 0.2s;
-      border: 1px solid #ddd;
+      border: 1.5px solid #ddd;
+      border-radius: 12px;
+      min-width: 180px;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      box-shadow: 0 2px 8px 0 rgba(0,0,0,0.02);
     }
     .payment-card input:checked + .card {
-      border: 2px solid #16a34a;
-      box-shadow: 0 0 8px rgba(22,163,74,0.3);
+      border: 2.5px solid #E873DA;
+      box-shadow: 0 0 8px rgba(16,182,198,0.12);
     }
     .payment-card img {
-      max-height: 80px;
+      max-height: 40px;
       object-fit: contain;
-      padding: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .payment-card .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #222;
+      margin-bottom: 0;
+    }
+    @media (max-width: 991px) {
+      .order-summary {
+        margin-top: 2rem;
+      }
+    }
+    /* Form fields */
+    .form-label {
+      font-weight: 500;
+      color: #222;
+    }
+    .fw-bold {
+      font-weight: 700 !important;
+    }
+    input[type="text"], input[type="email"] {
+      font-size: 1rem;
+      border-radius: 8px !important;
+      border: 1px solid #ddd !important;
+      background: #fafbfc;
+    }
+    input[type="text"]:focus, input[type="email"]:focus {
+      border-color: #10b6c6 !important;
+      box-shadow: 0 0 0 2px rgba(16,182,198,0.08);
+    }
+    .input-group-text {
+      background: #fafbfc;
+      border-radius: 0 8px 8px 0 !important;
+      border: 1px solid #ddd !important;
+      color: #888;
+      font-weight: 600;
+    }
+    .input-group input {
+      border-radius: 8px 0 0 8px !important;
+    }
+    .form-control::placeholder {
+      color: #bdbdbd;
+      font-size: 0.98em;
+    }
+    .mb-3 {
+      margin-bottom: 1.2rem !important;
+    }
+    .mb-1 {
+      margin-bottom: 0.5rem !important;
+    }
+    .mb-2 {
+      margin-bottom: 0.8rem !important;
+    }
+    .mb-4 {
+      margin-bottom: 2rem !important;
+    }
+    .text-danger {
+      color: #e53935 !important;
+    }
+    .btn-info {
+      background: #10b6c6 !important;
+      color: #fff !important;
+      border: none !important;
+    }
+    .btn-info:disabled {
+      opacity: 0.7;
+    }
+    .btn-success {
+      background: #E873DA !important;
+      border: none !important;
+      color: #fff !important;
+    }
+    .btn-success:hover {
+      background:rgb(212, 66, 195) !important;
     }
   </style>
 </head>
@@ -142,71 +289,102 @@ $purchase_order_name = 'Shady Shades Order';
         <input type="hidden" name="inputPurchasedOrderName4" value="<?= $purchase_order_name ?>">
 
         <!-- 1. General Information -->
-        <h5 class="mb-3">1. General Information</h5>
+        <h5 class="mb-3 fw-bold">1. General Information</h5>
         <input type="hidden" name="user_id" value="<?= $user_id; ?>">
-        <div class="mb-3">
-          <label class="form-label">Full Name *</label>
-          <input
-            type="text"
-            name="inputName"
-            class="form-control"
-            required
-            value="<?= htmlspecialchars($user['full_name'] ?? ''); ?>"
-          />
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input
-            type="email"
-            name="inputEmail"
-            class="form-control"
-            required
-            value="<?= htmlspecialchars($user['email'] ?? ''); ?>"
-          />
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Phone Number *</label>
-          <div class="input-group">
-            <span class="input-group-text">NP</span>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Full Name <span class="text-danger">*</span></label>
             <input
               type="text"
-              name="inputPhone"
+              name="inputName"
               class="form-control"
               required
-              maxlength="10"
-              pattern="\d{10}"
-              inputmode="numeric"
-              title="Phone number must be exactly 10 digits (0–9)."
-              value="<?= htmlspecialchars($user['phone'] ?? ''); ?>"
+              placeholder="eg: Ram Bahadur"
+              value="<?= htmlspecialchars($user['user_name'] ?? ''); ?>"
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              name="inputEmail"
+              class="form-control"
+              required
+              placeholder="eg: john@gmail.com"
+              value="<?= htmlspecialchars($user['user_email'] ?? ''); ?>"
             />
           </div>
         </div>
+        <div class="row">
+          <div class="col-md-8 mb-3">
+            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input
+                type="text"
+                name="inputPhone"
+                class="form-control"
+                required
+                maxlength="10"
+                pattern="\d{10}"
+                inputmode="numeric"
+                title="Phone number must be exactly 10 digits (0–9)."
+                placeholder="eg: 9862200000"
+                value="<?= htmlspecialchars($user['phone'] ?? ''); ?>"
+              />
+              <span class="input-group-text">NP</span>
+            </div>
+          </div>
+          <div class="col-md-4 mb-3"></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Order Note (any message for us)</label>
+          <input
+            type="text"
+            name="order_note"
+            class="form-control"
+            placeholder="eg: I was searching for this product from so long."
+            value="<?= isset($_POST['order_note']) ? htmlspecialchars($_POST['order_note']) : '' ?>"
+          />
+        </div>
 
         <!-- 2. Delivery Address -->
-        <h5 class="mb-3">2. Delivery Address</h5>
+        <h5 class="mb-3 fw-bold">2. Delivery Address</h5>
         <div class="mb-3">
-          <label class="form-label">City / District *</label>
+          <label class="form-label">City / District <span class="text-danger">*</span></label>
           <input
             type="text"
             name="inputCity"
             class="form-control"
             required
+            placeholder="Kathmandu Inside Ring Road"
             value="<?= htmlspecialchars($user['city'] ?? ''); ?>"
           />
         </div>
-        <div class="mb-3">
-          <label class="form-label">Address *</label>
-          <input
-            type="text"
-            name="inputAddress"
-            class="form-control"
-            required
-            value="<?= htmlspecialchars($user['address'] ?? ''); ?>"
-          />
+        <div class="row">
+          <div class="col-md-8 mb-3">
+            <label class="form-label">Address <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              name="inputAddress"
+              class="form-control"
+              required
+              placeholder="eg: kathmandu, tinkune"
+              value="<?= htmlspecialchars($user['address'] ?? ''); ?>"
+            />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Landmark</label>
+            <input
+              type="text"
+              name="landmark"
+              class="form-control"
+              placeholder="eg: madan bhandari park"
+            />
+          </div>
         </div>
 
         <!-- 3. Payment Method -->
-        <h5 class="mb-3">3. Payment Method</h5>
+        <h5 class="mb-3 fw-bold">3. Payment Method</h5>
         <div class="payment-options mb-4">
           <!-- Khalti Card -->
           <label class="payment-card">
@@ -246,6 +424,54 @@ $purchase_order_name = 'Shady Shades Order';
           </label>
         </div>
 
+      </form>
+    </div>
+
+    <!-- RIGHT: Order Summary -->
+    <div class="col-md-4">
+      <div class="order-summary">
+        <h5 class="fw-bold mb-3">Order Summary</h5>
+        <?php foreach ($cart_items as $item): 
+          $imgs       = json_decode($item['images'], true);
+          $thumb      = $imgs[0] ?? 'images/default.jpg';
+          $unit_price = ($item['discount_price'] > 0 ? $item['discount_price'] : $item['price']);
+        ?>
+          <div class="d-flex align-items-start mb-3 order-item">
+            <div style="position:relative;">
+              <img
+                src="<?= htmlspecialchars($thumb); ?>"
+                alt="Product"
+                class="me-2"
+              />
+              <span class="item-qty-badge"><?= $item['quantity']; ?></span>
+            </div>
+            <div>
+              <div class="fw-bold" style="font-size:1rem;"><?= htmlspecialchars($item['name']); ?></div>
+              <div class="text-success fw-bold mb-0" style="font-size:1rem;">
+                ₹ <?= number_format($unit_price); ?> <span class="text-muted" style="font-size:0.95em;">× <?= $item['quantity']; ?></span>
+              </div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+        <hr />
+        <div class="d-flex justify-content-between mb-1">
+          <span class="summary-label">Sub-total</span>
+          <span class="summary-value">₹ <?= number_format($total_price); ?></span>
+        </div>
+        <div class="d-flex justify-content-between mb-1">
+          <span class="summary-label">Delivery Charge</span>
+          <span class="summary-value">₹ <?= number_format($delivery_charge); ?></span>
+        </div>
+        <div class="d-flex justify-content-between fw-bold mb-3" style="font-size:1.1rem;">
+          <span>Total</span>
+          <span>₹ <?= number_format($grand_total); ?></span>
+        </div>
+        <?php if (!empty($_POST['order_note'])): ?>
+          <div class="mb-2">
+            <span class="fw-bold">Order Note:</span>
+            <span><?= htmlspecialchars($_POST['order_note']) ?></span>
+          </div>
+        <?php endif; ?>
         <button
           type="button"
           id="placeOrderBtn"
@@ -253,43 +479,6 @@ $purchase_order_name = 'Shady Shades Order';
         >
           Place Order
         </button>
-      </form>
-    </div>
-
-    <!-- RIGHT: Order Summary -->
-    <div class="col-md-4">
-      <div class="order-summary">
-        <h5>Order Summary</h5>
-        <?php foreach ($cart_items as $item): 
-          $imgs       = json_decode($item['images'], true);
-          $thumb      = $imgs[0] ?? 'images/default.jpg';
-          $unit_price = ($item['discount_price'] > 0 ? $item['discount_price'] : $item['price']);
-        ?>
-          <div class="d-flex align-items-start mb-3 order-item">
-            <img
-              src="<?= htmlspecialchars($thumb); ?>"
-              alt="Product"
-              class="me-2 rounded"
-            />
-            <div>
-              <p class="fw-bold"><?= htmlspecialchars($item['name']); ?>
-                <small class="text-muted">(x<?= $item['quantity']; ?>)</small>
-              </p>
-              <p class="text-success fw-bold mb-0">
-                ₹ <?= number_format($unit_price * $item['quantity']); ?>
-              </p>
-            </div>
-          </div>
-        <?php endforeach; ?>
-        <hr />
-        <div class="d-flex justify-content-between">
-          <span>Delivery Charge</span>
-          <span>₹ <?= number_format($delivery_charge); ?></span>
-        </div>
-        <div class="d-flex justify-content-between fw-bold">
-          <span>Total</span>
-          <span>₹ <?= number_format($grand_total); ?></span>
-        </div>
       </div>
     </div>
   </div>
@@ -299,7 +488,7 @@ $purchase_order_name = 'Shady Shades Order';
   // preserve original submit method
   const realSubmit = HTMLFormElement.prototype.submit;
 
-  document.getElementById("placeOrderBtn").addEventListener("click", () => {
+  function validateAndSubmit() {
     const form = document.getElementById("checkoutForm");
     const phoneField = form.elements.inputPhone;
     const phone = phoneField.value.trim();
@@ -327,7 +516,10 @@ $purchase_order_name = 'Shady Shades Order';
 
     // submit form
     realSubmit.call(form);
-  });
+  }
+
+  document.getElementById("placeOrderBtn").addEventListener("click", validateAndSubmit);
+  document.getElementById("placeOrderBtnSummary").addEventListener("click", validateAndSubmit);
 </script>
 
 </body>

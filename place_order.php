@@ -9,10 +9,12 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$full_name = $_POST['full_name'] ?? '';
-$phone = $_POST['phone'] ?? '';
-$city = $_POST['city'] ?? '';
-$address = $_POST['address'] ?? '';
+$full_name = $_POST['inputName'] ?? '';
+$phone = $_POST['inputPhone'] ?? '';
+$city = $_POST['inputCity'] ?? '';
+$address = $_POST['inputAddress'] ?? '';
+$payment_method = $_POST['payment_method'] ?? '';
+$order_note = $_POST['order_note'] ?? '';
 
 // Get the user's email from the users table
 $user_stmt = $conn->prepare("SELECT user_email FROM users WHERE id = ?");
@@ -29,12 +31,11 @@ if (!$user) {
 $email = $user['user_email']; // Get email from users table
 
 // Calculate grand total (you'll need to implement this based on your cart)
-$grand_total = 0; // Replace with actual calculation from cart
+$total_price = $_POST['inputAmount4'] ?? 0; // Use the value sent from the form
 
 // Insert order into the database (using correct column names)
-$stmt = $conn->prepare("INSERT INTO orders (user_id, full_name, phone, address, city, total_price, status) 
-                        VALUES (?, ?, ?, ?, ?, ?, 'pending')");
-$stmt->bind_param("issssd", $user_id, $full_name, $phone, $address, $city, $grand_total);
+$stmt = $conn->prepare("INSERT INTO orders (user_id, full_name, email, phone, address, city, payment_method, total_price, order_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("issssssds", $user_id, $full_name, $email, $phone, $address, $city, $payment_method, $total_price, $order_note);
 
 if ($stmt->execute()) {
     $order_id = $stmt->insert_id;

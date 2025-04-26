@@ -188,19 +188,21 @@ $total_products = mysqli_num_rows($result);
                         }
                     ?>
                         <div class="col">
-                            <div class="card h-100">
+                            <div class="card h-100 product-card-custom">
                                 <a href="product-detail.php?id=<?= $product['id'] ?>">
                                     <img src="<?= $images[0] ?>" class="card-img-top product-image" alt="<?= htmlspecialchars($product['name']) ?>" />
                                 </a>
                                 <div class="card-body text-center">
-                                    <h5 class="card-title"><?= $product_name ?></h5>
-                                    <p class="text-muted"><?= htmlspecialchars($product['brand_name']) ?></p>
-                                    <p class="card-text">
-                                        <span class="text-muted text-decoration-line-through">Rs <?= number_format($product['price']) ?></span>
-                                        <span class="ms-2 fw-bold text-success">Rs <?= number_format($product['discount_price']) ?></span>
-                                    </p>
-                                    <span class="badge bg-primary">SAVE Rs <?= number_format($product['price'] - $product['discount_price']) ?></span>
-                                    <a href="product-detail.php?id=<?= $product['id'] ?>" class="btn btn-success mt-2">View Details</a>
+                                    <h5 class="card-title fw-bold mb-2" style="font-size: 1.2rem;"><?= $product_name ?></h5>
+                                    <!-- Brand name removed as per image -->
+                                    <div class="mb-2">
+                                        <span class="text-muted text-decoration-line-through" style="font-size: 1.1rem;">₹ <?= number_format($product['price']) ?></span>
+                                        <span class="ms-2 fw-bold text-success" style="font-size: 1.2rem;">₹ <?= number_format($product['discount_price']) ?></span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="badge save-badge-custom">SAVE <?= number_format($product['price'] - $product['discount_price']) ?></span>
+                                    </div>
+                                    <!-- No "View Details" button as per image -->
                                 </div>
                             </div>
                         </div>
@@ -220,12 +222,48 @@ $total_products = mysqli_num_rows($result);
 <!-- Image Hover Effect -->
 <style>
     .product-image {
-        transition: transform 0.3s ease-in-out;
-        height: 200px;
-        object-fit: contain;
+        width: 100%;
+        transition: all .2s ease-in-out;
+        height: 270px;
+        object-fit: cover;
+        background: #fff;
+        border-radius: 10px 10px 0 0;
+        padding: 10px;
     }
     .product-image:hover {
         transform: scale(1.05);
+    }
+    .product-card-custom {
+        border-radius: 16px;
+        border: none;
+        margin-bottom: 10px;
+        background: #fff;
+    }
+    .product-card-custom .card-body {
+        padding: 1.2rem 1rem 1.5rem 1rem;
+    }
+    .card-title {
+        font-weight: 700;
+        color: #444;
+        min-height: 48px;
+        margin-bottom: 0.5rem;
+    }
+    .save-badge-custom {
+        background: #4caf50;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: 0.5em 1.2em;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        display: inline-block;
+    }
+    .text-success {
+        color: #388e3c !important;
+    }
+    .text-decoration-line-through {
+        color: #222 !important;
+        opacity: 0.7;
     }
     mark {
         background-color: yellow;
@@ -234,8 +272,11 @@ $total_products = mysqli_num_rows($result);
     .card {
         transition: box-shadow 0.3s ease;
     }
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+    @media (max-width: 991px) {
+        .product-image {
+            height: 180px;
+        }
     }
 </style>
 

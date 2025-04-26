@@ -105,23 +105,41 @@ if (isset($_SESSION['user_id'])) {
             $main_image = $images[0] ?? 'default-product.jpg';
         ?>
             <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="position-relative overflow-hidden" style="height: 250px;">
+                <div class="card h-100 product-card-custom">
+                    <div class="position-relative overflow-hidden" style="height: 220px;">
                         <img src="<?= htmlspecialchars($main_image) ?>" 
-                             class="card-img-top h-100 object-fit-cover" 
+                             class="card-img-top product-image"
                              alt="<?= htmlspecialchars($product['name']) ?>">
                     </div>
                     <div class="card-body text-center">
-                        <h5 class="card-title"><?= htmlspecialchars($product['name']) ?></h5>
-                        <p class="text-muted"><?= htmlspecialchars($product['brand_name']) ?></p>
-                        <p class="card-text fw-bold text-success">Rs <?= number_format($product['price']) ?></p>
+                        <h5 class="card-title product-title-custom mb-2"><?= htmlspecialchars($product['name']) ?></h5>
+                        <div class="mb-2 d-flex justify-content-center align-items-center gap-2">
+                            <?php if ($product['discount_price'] > 0): ?>
+                                <span class="old-price-custom">
+                                    <span class="rupee-custom">₹</span> <?= number_format($product['price']) ?>
+                                </span>
+                                <span class="new-price-custom">
+                                    <span class="rupee-custom">₹</span> <?= number_format($product['discount_price']) ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="new-price-custom">
+                                    <span class="rupee-custom">₹</span> <?= number_format($product['price']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($product['discount_price'] > 0): ?>
+                        <div class="mb-2">
+                            <span class="badge save-badge-custom">
+                                SAVE <?= number_format($product['price'] - $product['discount_price']) ?>
+                            </span>
+                        </div>
+                        <?php endif; ?>
 
-                        <div class="d-grid gap-2">
+                        <div class="d-grid gap-2 mt-3">
                             <a href="customize_prescription.php?product_id=<?= $product['id'] ?>" 
                                class="btn btn-primary">
                                Customize with Prescription
                             </a>
-
                             <?php if (!empty($prescriptions)): ?>
                             <div class="dropdown">
                                 <button class="btn btn-outline-primary dropdown-toggle" type="button" 
@@ -150,41 +168,87 @@ if (isset($_SESSION['user_id'])) {
 
 <?php include('footer.php'); ?>
 
-<!-- Custom CSS Styles -->
 <style>
-    .card-img-top {
-        transition: transform 0.3s ease-in-out;
-        height: 200px;
-        object-fit: contain;
+    .product-image {
+        width: 100%;
+        transition: all .2s ease-in-out;
+        height: 270px;
+        object-fit: cover;
+        background: #fff;
+        border-radius: 10px 10px 0 0;
+        padding: 10px;
     }
-
-    .card-img-top:hover {
+    .product-image:hover {
         transform: scale(1.05);
     }
-
+    .product-card-custom {
+        border-radius: 16px;
+        border: none;
+        margin-bottom: 10px;
+        background: #fff;
+    }
+    .product-card-custom .card-body {
+        padding: 1.2rem 1rem 1.5rem 1rem;
+    }
+    .card-title {
+        font-weight: 700;
+        color: #444;
+        min-height: 48px;
+        margin-bottom: 0.5rem;
+    }
+    .old-price-custom {
+        color: #222;
+        opacity: 0.7;
+        font-size: 1.1rem;
+        text-decoration: line-through;
+        font-weight: 700;
+        margin-right: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    .new-price-custom {
+        color: #21b573;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-left: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    .rupee-custom {
+        font-family: Arial, sans-serif;
+        font-weight: 700;
+        font-size: 1.1em;
+        margin-right: 2px;
+    }
+    .save-badge-custom {
+        background: #4caf50;
+        color: #fff;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: 0.5em 1.2em;
+        font-size: 1rem;
+        letter-spacing: 1px;
+        display: inline-block;
+    }
+    .text-success {
+        color: #388e3c !important;
+    }
+    .text-decoration-line-through {
+        color: #222 !important;
+        opacity: 0.7;
+    }
+    mark {
+        background-color: yellow;
+        padding: 0;
+    }
     .card {
         transition: box-shadow 0.3s ease;
     }
 
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    }
-
-    .btn-primary:hover {
-        background-color: #0066cc;
-        border-color: #0066cc;
-    }
-
-    .dropdown-menu {
-        width: 250px;
-    }
-
-    .dropdown-item {
-        text-align: center;
-    }
-
-    .card-body {
-        text-align: center;
+    @media (max-width: 991px) {
+        .product-image {
+            height: 180px;
+        }
     }
 </style>
 
