@@ -122,16 +122,20 @@ unset($_SESSION['alert_type']);
                         <div class="text-center mb-4">
                         </div>
                         
-                        <h5 class="card-title"><?= htmlspecialchars($user['user_name'] ?? 'User') ?></h5>
-                        <p class="text-muted mb-1"><i class="bi bi-envelope"></i> <?= htmlspecialchars($user['user_email'] ?? 'No email') ?></p>
-                        <p class="text-muted mb-1"><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['phone'] ?? 'No phone') ?></p>
-                        <p class="text-muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars(($user['address'] ?? 'No address') . ', ' . ($user['city'] ?? '')) ?></p>
-                        
                         <?php if ($user_type === 'doctor' && !empty($doctor)): ?>
+                            <h5 class="card-title"><?= htmlspecialchars($doctor['full_name'] ?? 'Doctor') ?></h5>
+                            <p class="text-muted mb-1"><i class="bi bi-envelope"></i> <?= htmlspecialchars($doctor['email'] ?? 'No email') ?></p>
+                            <p class="text-muted mb-1"><i class="bi bi-telephone"></i> <?= htmlspecialchars($doctor['phone'] ?? 'No phone') ?></p>
+                            <p class="text-muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars(($doctor['address'] ?? 'No address') . ', ' . ($doctor['city'] ?? '')) ?></p>
                             <hr>
                             <h6 class="card-subtitle mb-2 text-muted">Professional Information</h6>
                             <p><strong>NMC Number:</strong> <?= htmlspecialchars($doctor['nmc_number'] ?? 'Not available') ?></p>
                             <p><strong>Specialization:</strong> <?= htmlspecialchars($doctor['specialization'] ?? 'Not specified') ?></p>
+                        <?php else: ?>
+                            <h5 class="card-title"><?= htmlspecialchars($user['user_name'] ?? 'User') ?></h5>
+                            <p class="text-muted mb-1"><i class="bi bi-envelope"></i> <?= htmlspecialchars($user['user_email'] ?? 'No email') ?></p>
+                            <p class="text-muted mb-1"><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['phone'] ?? 'No phone') ?></p>
+                            <p class="text-muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars(($user['address'] ?? 'No address') . ', ' . ($user['city'] ?? '')) ?></p>
                         <?php endif; ?>
                         
                         <a href="edit_profile.php" class="btn btn-outline-primary mt-3 w-100">Edit Profile</a>
@@ -167,29 +171,28 @@ unset($_SESSION['alert_type']);
                                 <form method="POST" action="update_profile.php">
                                     <div class="mb-3">
                                         <label class="form-label">Full Name</label>
-                                        <input type="text" name="user_name" class="form-control" value="<?= htmlspecialchars($user['user_name'] ?? ''); ?>" required />
+                                        <input type="text" name="user_name" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['full_name'] ?? '') : ($user['user_name'] ?? '')); ?>" required />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
-                                        <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user['user_email'] ?? ''); ?>" required />
+                                        <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['email'] ?? '') : ($user['user_email'] ?? '')); ?>" required />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Phone</label>
-                                        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" />
+                                        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['phone'] ?? '') : ($user['phone'] ?? '')); ?>" />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Address</label>
-                                        <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user['address'] ?? ''); ?>" />
+                                        <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['address'] ?? '') : ($user['address'] ?? '')); ?>" />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">City</label>
-                                        <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user['city'] ?? ''); ?>" />
+                                        <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['city'] ?? '') : ($user['city'] ?? '')); ?>" />
                                     </div>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-save me-1"></i>Update Profile
                                     </button>
                                 </form>
-
                                 <hr class="my-4">
 
                                 <h5 class="mb-3">Change Password</h5>

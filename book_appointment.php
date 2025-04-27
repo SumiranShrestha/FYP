@@ -87,8 +87,14 @@ if (!empty($doctor['availability'])) {
     $decoded = json_decode($cleaned, true);
     if ($decoded && is_array($decoded)) {
         foreach ($decoded as $day => $times) {
-            $timeSlots = explode(',', $times);
-            $availability[$day] = array_map('trim', $timeSlots);
+            if (is_array($times)) {
+                // Already an array of time slots
+                $availability[$day] = array_map('trim', $times);
+            } else {
+                // String, possibly comma-separated
+                $timeSlots = explode(',', $times);
+                $availability[$day] = array_map('trim', $timeSlots);
+            }
         }
     } else {
         // Fallback sample data

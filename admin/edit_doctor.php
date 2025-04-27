@@ -29,15 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
     $availability = isset($_POST['availability']) ? $_POST['availability'] : [];
     $availability_times = isset($_POST['availability_times']) ? $_POST['availability_times'] : [];
 
-    // Format the availability data as a JSON string
+    // Format the availability data as a JSON string (support multiple time slots per day)
     $availability_data = [];
     foreach ($availability as $day => $checked) {
         if (isset($availability_times[$day])) {
-            $availability_data[$day] = $availability_times[$day];
+            // Accept comma-separated or array input, always store as array
+            $times = $availability_times[$day];
+            if (!is_array($times)) {
+                // Split by comma and trim
+                $slots = array_filter(array_map('trim', explode(',', $times)));
+            } else {
+                $slots = array_filter(array_map('trim', $times));
+            }
+            if (!empty($slots)) {
+                $availability_data[$day] = $slots;
+            }
         }
     }
-
-    // Encode the availability data as JSON
     $availability_json = json_encode($availability_data);
 
     // Update doctor
@@ -144,13 +152,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
                             <!-- Checkboxes for days of the week -->
                             <?php foreach ($daysOfWeek as $day): 
                                 $isAvailable = isset($availability[$day]) ? 'checked' : '';
-                                $time = $availability[$day] ?? ''; // If available, show the stored time
+                                $timeArr = $availability[$day] ?? [];
+                                $timeValue = is_array($timeArr) ? implode(', ', $timeArr) : $timeArr;
                             ?>
                                 <div class="mb-3 form-check">
                                     <input type="checkbox" class="form-check-input" id="availability_<?= $day ?>" name="availability[<?= $day ?>]" <?= $isAvailable ?> onclick="toggleTimeInput('<?= $day ?>')">
                                     <label class="form-check-label" for="availability_<?= $day ?>"><?= $day ?></label>
-                                    <!-- Input field for time, shown only if the day is checked -->
-                                    <input type="text" class="form-control mt-2" id="time_<?= $day ?>" name="availability_times[<?= $day ?>]" value="<?= htmlspecialchars($time) ?>" placeholder="Enter time" <?= !$isAvailable ? 'disabled' : '' ?>>
+                                    <!-- Input field for time slots, comma separated -->
+                                    <input type="text" class="form-control mt-2" id="time_<?= $day ?>" name="availability_times[<?= $day ?>]" value="<?= htmlspecialchars($timeValue) ?>" placeholder="Enter time slots, e.g. 9:00 AM, 10:00 AM" <?= !$isAvailable ? 'disabled' : '' ?>>
+                                    <small class="text-muted">Separate multiple time slots with a comma.</small>
                                 </div>
                             <?php endforeach; ?>
 

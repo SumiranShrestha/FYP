@@ -118,7 +118,13 @@ unset($_SESSION['alert_type']);
                                             if (is_array($availability) && !empty($availability)) {
                                                 echo "<ul>";
                                                 foreach ($availability as $day => $time) {
-                                                    echo "<li><strong>$day</strong>: $time</li>";
+                                                    if (is_array($time)) {
+                                                        // Join multiple time slots with comma
+                                                        $displayTime = htmlspecialchars(implode(', ', $time));
+                                                    } else {
+                                                        $displayTime = htmlspecialchars($time);
+                                                    }
+                                                    echo "<li><strong>" . htmlspecialchars($day) . "</strong>: $displayTime</li>";
                                                 }
                                                 echo "</ul>";
                                             } else {

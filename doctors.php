@@ -181,7 +181,7 @@ $conn->close();
                     // Show toast at bottom right
                     var toastEl = document.getElementById('loginToast');
                     toastEl.style.display = 'block';
-                    var toast = new bootstrap.Toast(toastEl, { delay: 1200 });
+                    var toast = new bootstrap.Toast(toastEl, { delay: 1800 });
                     toast.show();
                     // After toast, open login modal
                     setTimeout(function() {

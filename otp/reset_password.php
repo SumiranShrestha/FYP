@@ -15,15 +15,14 @@ if (isset($_POST['reset_password'])) {
     $stmt->bind_param("ss", $password, $email);
 
     if ($stmt->execute()) {
+        // Show popup and redirect via JS instead of PHP header
+        $reset_success = true;
         session_destroy();
-        header("Location: ../index.php?message=Password reset successfully"); // Redirect to login page
-        exit;
     } else {
         $error = "Failed to reset password.";
     }
 }
 ?>
-
 <?php include('../header.php'); ?>
 
 <section class="my-5 py-5">
@@ -49,5 +48,22 @@ if (isset($_POST['reset_password'])) {
     </form>
   </div>
 </section>
+
+<!-- Toastr CSS/JS (if not already included in header) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+<?php if (!empty($reset_success)): ?>
+    toastr.options = {
+        "positionClass": "toast-bottom-right",
+        "timeOut": 2000,
+        "closeButton": true
+    };
+    toastr.success("Reset password Successfull");
+    setTimeout(function() {
+        window.location.href = "../index.php";
+    }, 2000);
+<?php endif; ?>
+</script>
 
 <?php include('../footer.php'); ?>

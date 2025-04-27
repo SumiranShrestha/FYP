@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 26, 2025 at 07:57 AM
+-- Generation Time: Apr 27, 2025 at 05:39 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -62,7 +62,9 @@ CREATE TABLE `appointments` (
 
 INSERT INTO `appointments` (`id`, `user_id`, `doctor_id`, `appointment_date`, `status`, `prescription`, `user_name`) VALUES
 (54, 10, 6, '2025-04-14 15:00:00', 'pending', '', NULL),
-(57, 10, 6, '2025-04-28 15:00:00', 'cancelled', NULL, NULL);
+(57, 10, 6, '2025-04-28 15:00:00', 'cancelled', NULL, NULL),
+(62, 10, 6, '2025-04-28 15:00:00', 'pending', NULL, NULL),
+(63, 10, 6, '2025-04-28 16:00:00', 'pending', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -130,6 +132,13 @@ CREATE TABLE `cart` (
   `prescription_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `prescription_id`) VALUES
+(124, 10, 2, 1, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -177,8 +186,8 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`id`, `full_name`, `email`, `password`, `phone`, `nmc_number`, `specialization`, `availability`, `created_at`, `address`, `city`) VALUES
-(6, 'Bibek Shrestha ', 'Bibek@gmail.com', '$2y$10$IR1Ku9Lu/U4Aac19dK4Qk.UBl16Ln9WCt6CdiHJklBGzbWyJpG2ay', '1234567890', 'NMC123', 'Eye Specialist', '{\"Monday\":\"3:00 PM\",\"Sunday\":\"10:00 AM\"}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
-(13, 'Anju Khatri', 'anju@gmail.com', '$2y$10$JRHVFkXZN0Aj97lkfQO9yOpoqxUN1JJVLJDcsUqXwnjJiLv1Ukx0u', '90000000000', 'testabc', 'Eye Specialist', '{\"Monday\":\"9:00 AM\"}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu');
+(6, 'Bibek Shrestha ', 'Bibek@gmail.com', '$2y$10$IR1Ku9Lu/U4Aac19dK4Qk.UBl16Ln9WCt6CdiHJklBGzbWyJpG2ay', '1234567890', 'NMC123', 'Eye Specialist', '{\"Monday\":[\"3:00 PM\",\"4:00 PM\"],\"Sunday\":[\"10:00 AM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
+(13, 'Sumi Shrestha', 'sumi@gmail.com', '$2y$10$gAd1JrLDK2rQcPSLq0oYienVRf8.XJqDy98fjHQub6iUzIGMdktRe', '90000000000', 'testabc', 'Eye Specialist', '{\"Monday\":\"9:00 AM\"}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu');
 
 -- --------------------------------------------------------
 
@@ -222,15 +231,20 @@ CREATE TABLE `orders` (
   `status` enum('pending','processing','shipped','delivered','cancelled') DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `order_status` enum('Pending','Processing','Completed','Cancelled') NOT NULL DEFAULT 'Pending',
-  `prescription_id` int(11) DEFAULT NULL
+  `prescription_id` int(11) DEFAULT NULL,
+  `order_note` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `user_id`, `full_name`, `email`, `phone`, `address`, `city`, `payment_method`, `total_price`, `status`, `created_at`, `order_status`, `prescription_id`) VALUES
-(86, 10, '', NULL, '', '', '', '', 0.00, 'shipped', '2025-04-24 09:42:25', 'Pending', NULL);
+INSERT INTO `orders` (`id`, `user_id`, `full_name`, `email`, `phone`, `address`, `city`, `payment_method`, `total_price`, `status`, `created_at`, `order_status`, `prescription_id`, `order_note`) VALUES
+(104, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, 'pending', '2025-04-26 10:25:03', 'Pending', NULL, NULL),
+(106, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 22100.00, 'pending', '2025-04-26 10:28:13', 'Pending', NULL, NULL),
+(107, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 300.00, 'pending', '2025-04-26 10:36:48', 'Pending', NULL, 'I was searching for it.'),
+(108, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 300.00, 'pending', '2025-04-26 10:48:28', 'Pending', NULL, NULL),
+(109, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-26 11:05:55', 'Pending', NULL, 'nice');
 
 -- --------------------------------------------------------
 
@@ -245,6 +259,14 @@ CREATE TABLE `order_items` (
   `quantity` int(11) NOT NULL,
   `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
+(38, 104, 4, 1, 1500.00),
+(39, 106, 3, 1, 22000.00);
 
 -- --------------------------------------------------------
 
@@ -337,9 +359,7 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `discount_price`, 
 (7, 'Tom Ford Square Women\'s Sunglass\n', 'Description\n\nTom Ford [Model] Sunglasses\n\nElevate your style with the Tom Ford [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Tom Ford [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 7, 7, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0438-5827.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0437-8356.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0439-8971.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
 (8, 'Burberry Square Women\'s Sunglass\n', 'Description\n\nBurberry [Model] Sunglasses\n\nElevate your style with the Burberry [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Burberry [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 9, 8, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0434-7678.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0436-8460.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0435-8310.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
 (14, 'Magic TR Transparent, Blue-cut Frame (Small Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cover', 1299.00, 950.00, 15, 1, '[\"..\\/uploads\\/67f65a9e486d7_product_image-img_0185-0987 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL),
-(20, 'Magic TR Transparent, Blue-cut Frame (Big Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cove', 1299.00, 950.00, 6, 4, '[\"..\\/uploads\\/67f6586be8d5f_product_image-img_0169-9658 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL),
-(32, 'ljhsbdfkbsdf', 'jHWFJADFJASDF', 1200.00, 200.00, 4, 1, '[\"..\\/uploads\\/67f77f90bb1eb_product_image-img_1054-8632 (1).webp\"]', '2025-04-10 08:21:16', 4, 0, 'both'),
-(33, 'jjggwvfjasdf', 'kajshfkjasdf', 2000.00, 20.00, 10, 1, '[\"..\\/uploads\\/67f7842fa5aac_product_image-img_1052-6304.webp\"]', '2025-04-10 08:40:57', 4, 0, 'both');
+(20, 'Magic TR Transparent, Blue-cut Frame (Big Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cove', 1299.00, 950.00, 6, 4, '[\"..\\/uploads\\/67f6586be8d5f_product_image-img_0169-9658 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL);
 
 -- --------------------------------------------------------
 
@@ -364,7 +384,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `user_name`, `user_email`, `user_password`, `registration_date`, `phone`, `address`, `city`, `active`) VALUES
-(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$qCDxKMGifniccd/qEIJoiudkWmOMxuI6XxIQmZifvkDsaJpsm0kEi', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
+(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$DoU1ueA7jI.xhduc.0O3HuabOHG8uXXmGDDbWbMXmUZiWj9fh2vue', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
 (16, 'Mellow Plays', 'mellowplays22@gmail.com', '$2y$10$eaJl391wb1qU2i.cKvNVUeKZYkb7TtxDiJC1Y8rV0PzJBsXk4SwVW', '2025-04-20 10:14:42', '9826455863', 'Dhapasi', 'Kathmandu', 1);
 
 --
@@ -491,7 +511,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `banners`
@@ -509,7 +529,7 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -533,13 +553,13 @@ ALTER TABLE `faqs`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- AUTO_INCREMENT for table `prescription_frames`
