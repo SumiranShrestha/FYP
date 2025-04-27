@@ -171,28 +171,80 @@ unset($_SESSION['alert_type']);
                                 <form method="POST" action="update_profile.php">
                                     <div class="mb-3">
                                         <label class="form-label">Full Name</label>
-                                        <input type="text" name="user_name" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['full_name'] ?? '') : ($user['user_name'] ?? '')); ?>" required />
-                                    </div>
+                                        <input type="text" name="user_name" class="form-control" vale="<?= htmlspecialchars($user['user_name'] ?? ''); ?>" required />                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
-                                        <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['email'] ?? '') : ($user['user_email'] ?? '')); ?>" required />
+                                        <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user['user_email'] ?? ''); ?>" required />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Phone</label>
-                                        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['phone'] ?? '') : ($user['phone'] ?? '')); ?>" />
+                                        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Address</label>
-                                        <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['address'] ?? '') : ($user['address'] ?? '')); ?>" />
+                                        <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user['address'] ?? ''); ?>" />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">City</label>
-                                        <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user_type === 'doctor' ? ($doctor['city'] ?? '') : ($user['city'] ?? '')); ?>" />
+                                        <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user['city'] ?? ''); ?>" />
                                     </div>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-save me-1"></i>Update Profile
                                     </button>
                                 </form>
+
+                                <?php if ($user_type === 'doctor' && !empty($doctor)): ?>
+                                    <hr class="my-4">
+                                    <h5 class="mb-3">Update Availability</h5>
+                                    <?php
+                                        // Parse availability JSON if present
+                                        $availability = [];
+                                        if (!empty($doctor['availability'])) {
+                                            $availability = json_decode($doctor['availability'], true);
+                                        }
+                                    ?>
+                                    <form method="POST" action="update_availability.php">
+                                        <div class="mb-3">
+                                            <label class="form-label">Day</label>
+                                            <select name="day" class="form-select" required>
+                                                <option value="">Select Day</option>
+                                                <?php
+                                                $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                                                foreach ($days as $day) {
+                                                    echo '<option value="'.$day.'">'.$day.'</option>';
+                                                }
+                                                ?>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Available Time(s) (comma separated)</label>
+                                            <input type="text" name="times" class="form-control" placeholder="e.g. 10:00 AM, 2:00 PM" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-success mb-2">Add/Update Availability</button>
+                                    </form>
+                                    <?php if (!empty($availability)): ?>
+                                        <div class="mt-3">
+                                            <h6>Current Availability:</h6>
+                                            <ul class="list-group">
+                                                <?php foreach ($availability as $day => $times): ?>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <span>
+                                                            <strong><?= htmlspecialchars($day) ?>:</strong>
+                                                            <?= is_array($times) ? htmlspecialchars(implode(', ', $times)) : htmlspecialchars($times) ?>
+                                                        </span>
+                                                        <form method="POST" action="update_availability.php" style="margin:0;">
+                                                            <input type="hidden" name="delete_day" value="<?= htmlspecialchars($day) ?>">
+                                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete availability for <?= htmlspecialchars($day) ?>?')">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
                                 <hr class="my-4">
 
                                 <h5 class="mb-3">Change Password</h5>
