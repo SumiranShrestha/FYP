@@ -33,7 +33,7 @@ if ($pidx) {
         
         switch ($responseArray['status']) {
             case 'Completed':
-                // Update order status in database
+                // Only update order status, do NOT insert a new order here
                 $order_id = $responseArray['purchase_order_id'];
                 $stmt = $conn->prepare("UPDATE orders SET order_status = 'Paid' WHERE order_id = ?");
                 $stmt->bind_param("i", $order_id);

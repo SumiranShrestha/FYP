@@ -10,51 +10,105 @@ require '../PHPMailer-master/src/PHPMailer.php';
 require '../PHPMailer-master/src/SMTP.php';
 require '../PHPMailer-master/src/Exception.php';
 
+$redirect_script = ''; // Add this variable to store any JS redirect
+
 if (isset($_POST['submit_email'])) {
-    $email = $_POST['email'];
+  $email = $_POST['email'];
 
-    // Check if user exists
-    $stmt = $conn->prepare("SELECT * FROM users WHERE user_email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+  // Check if the email exists in the users table
+  $stmt = $conn->prepare("SELECT * FROM users WHERE user_email = ?");
+  $stmt->bind_param("s", $email);
+  $stmt->execute();
+  $result = $stmt->get_result();
 
-    if ($result->num_rows == 1) {
-        $otp = rand(100000, 999999);
-        $_SESSION['otp'] = $otp;
-        $_SESSION['reset_email'] = $email;
-        $_SESSION['otp_expire'] = time() + 300;
+  if ($result->num_rows == 1) {
+    // If user found, send OTP
+    $otp = rand(100000, 999999);
+    $_SESSION['otp'] = $otp;
+    $_SESSION['reset_email'] = $email;
+    $_SESSION['otp_expire'] = time() + 300;
 
-        $mail = new PHPMailer(true);
+    $mail = new PHPMailer(true);
+    try {
+      // SMTP settings
+      $mail->isSMTP();
+      $mail->Host = 'smtp.gmail.com';
+      $mail->SMTPAuth = true;
+      $mail->Username = 'np03cs4s230199@heraldcollege.edu.np'; // Replace with your Gmail
+      $mail->Password = 'gwwj hdus ymxk eluw'; // Replace with Gmail App Password
+      $mail->SMTPSecure = 'tls';
+      $mail->Port = 587;
 
-        try {
-            // SMTP settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'np03cs4s230199@heraldcollege.edu.np';       // replace with your Gmail
-            $mail->Password = 'gwwj hdus ymxk eluw';          // replace with Gmail App Password
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+      $mail->setFrom('np03cs4s230199@heraldcollege.edu.np', 'Shady Shades');
+      $mail->addAddress($email);
+      $mail->Subject = 'Your OTP Code';
+      $mail->Body = "Your Shady Shades Account code is $otp. Do not share this code with anyone. It is valid for 5 minutes.";
 
-            $mail->setFrom('np03cs4s230199@heraldcollege.edu.np', 'Shady Shades');
-            $mail->addAddress($email);
-            $mail->Subject = 'Your OTP Code';
-            $mail->Body = "Your Shady Shades Account code is $otp. Do not share this code with anyone. It is valid for 5 minutes.";
-
-            $mail->send();
-            header("Location: verify_otp.php?message=OTP Sent to your email");
-            exit;
-        } catch (Exception $e) {
-            $error = "Mailer Error: " . $mail->ErrorInfo;
-        }
-    } else {
-        $error = "Email not registered.";
+      $mail->send();
+      header("Location: verify_otp.php?message=OTP Sent to your email");
+      exit;
+    } catch (Exception $e) {
+      $error = "Mailer Error: " . $mail->ErrorInfo;
     }
+  } else {
+    // Check if the email exists in the doctors table
+    $stmt2 = $conn->prepare("SELECT * FROM doctors WHERE email = ?");
+    $stmt2->bind_param("s", $email);
+    $stmt2->execute();
+    $result2 = $stmt2->get_result();
+
+    if ($result2->num_rows == 1) {
+      // If doctor found, send OTP
+      $otp = rand(100000, 999999);
+      $_SESSION['doctor_otp'] = $otp;
+      $_SESSION['doctor_reset_email'] = $email;
+      $_SESSION['doctor_otp_expire'] = time() + 300;
+
+      $mail = new PHPMailer(true);
+      try {
+        // SMTP settings
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'np03cs4s230199@heraldcollege.edu.np'; // Replace with your Gmail
+        $mail->Password = 'gwwj hdus ymxk eluw'; // Replace with Gmail App Password
+        $mail->SMTPSecure = 'tls';
+        $mail->Port = 587;
+
+        $mail->setFrom('np03cs4s230199@heraldcollege.edu.np', 'Shady Shades');
+        $mail->addAddress($email);
+        $mail->Subject = 'Your Shady Shades Doctor Account OTP Code';
+        $mail->Body = "Your Shady Shades Doctor Account code is $otp. Do not share this code. It is valid for 5 minutes.";
+
+        $mail->send();
+        header("Location: verify_otp.php?message=OTP Sent to your email");
+        exit;
+      } catch (Exception $e) {
+        $error = "Mailer Error: " . $mail->ErrorInfo;
+      }
+    } else {
+      // If email is not found in both users and doctors tables, ask the user
+      $redirect_script = "<script>
+                var userType = confirm('Email not found. Are you a doctor? Click OK for Doctor or Cancel for User.');
+                if (userType) {
+                    window.location.href = 'doctor_reset_password.php?email=$email'; // Redirect to doctor reset page
+                } else {
+                    window.location.href = 'user_reset_password.php?email=$email'; // Redirect to user reset page
+                }
+            </script>";
+    }
+  }
 }
 ?>
 
 <?php include('../header.php'); ?>
+
+<?php
+// Output the redirect script after the header is included
+if (!empty($redirect_script)) {
+    echo $redirect_script;
+}
+?>
 
 <section class="my-5 py-5">
   <div class="container text-center mt-3 pt-5">

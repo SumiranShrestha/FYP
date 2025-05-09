@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 27, 2025 at 08:50 AM
+-- Generation Time: May 05, 2025 at 10:22 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -61,12 +61,8 @@ CREATE TABLE `appointments` (
 --
 
 INSERT INTO `appointments` (`id`, `user_id`, `doctor_id`, `appointment_date`, `status`, `prescription`, `user_name`) VALUES
-(54, 10, 6, '2025-04-14 15:00:00', 'pending', '', NULL),
-(57, 10, 6, '2025-04-28 15:00:00', 'cancelled', NULL, NULL),
-(62, 10, 6, '2025-04-28 15:00:00', 'pending', NULL, NULL),
-(64, 10, 6, '2025-04-28 16:00:00', 'confirmed', '', NULL),
-(65, 10, 13, '2025-04-29 14:00:00', 'pending', NULL, NULL),
-(66, 10, 13, '2025-04-27 09:00:00', 'pending', NULL, NULL);
+(89, 10, 6, '2025-05-04 14:00:00', 'cancelled', NULL, NULL),
+(90, 10, 6, '2025-05-11 09:00:00', 'pending', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -134,13 +130,6 @@ CREATE TABLE `cart` (
   `prescription_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `cart`
---
-
-INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `prescription_id`) VALUES
-(124, 10, 2, 1, NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -188,8 +177,8 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`id`, `full_name`, `email`, `password`, `phone`, `nmc_number`, `specialization`, `availability`, `created_at`, `address`, `city`) VALUES
-(6, 'Bibek Shrestha', 'bibek@gmail.com', '$2y$10$eKrhKi7tz1U6zeUY/KqbGuM3If1IozzOIprKUCkaMUTTkc1tuf.3q', '9843641720', 'NMC123', 'Eye Specialist', '{\"Monday\":[\"3:00 PM\",\"4:00 PM\"],\"Sunday\":[\"9:00 AM\",\"2:00 PM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
-(13, 'Sumi Shrestha', 'sumi@gmail.com', '$2y$10$gAd1JrLDK2rQcPSLq0oYienVRf8.XJqDy98fjHQub6iUzIGMdktRe', '9826455863', 'testabc', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\"],\"Tuesday\":[\"9:00 AM\",\"2:00 PM\"]}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu');
+(6, 'Bibek Shrestha', 'bibek@gmail.com', '$2y$10$eKrhKi7tz1U6zeUY/KqbGuM3If1IozzOIprKUCkaMUTTkc1tuf.3q', '9843641720', 'NMC123', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\",\"2:00 PM\"],\"Tuesday\":[\"1:00 PM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
+(13, 'Sumi Shrestha', 'sumi@gmail.com', '$2y$10$HD6a8prw7zbWNjDOxaXLlOONTUmb32XtRG5MLlkFcQjVPitao15Kq', '9826455863', 'testabc', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\"],\"Tuesday\":[\"9:00 AM\",\"2:00 PM\"]}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu');
 
 -- --------------------------------------------------------
 
@@ -247,7 +236,8 @@ INSERT INTO `orders` (`id`, `user_id`, `full_name`, `email`, `phone`, `address`,
 (107, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 300.00, 'pending', '2025-04-26 10:36:48', 'Pending', NULL, 'I was searching for it.'),
 (108, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 300.00, 'pending', '2025-04-26 10:48:28', 'Pending', NULL, NULL),
 (109, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-26 11:05:55', 'Pending', NULL, 'nice'),
-(110, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-27 04:59:16', 'Pending', NULL, 'I was searching for it.');
+(110, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-27 04:59:16', 'Pending', NULL, 'I was searching for it.'),
+(111, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 100.00, 'pending', '2025-05-04 08:36:32', 'Pending', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -387,8 +377,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `user_name`, `user_email`, `user_password`, `registration_date`, `phone`, `address`, `city`, `active`) VALUES
-(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$C1Mae.xEZtAHOJOg8.3Z1eKy82tjQsta4eSgWs2OVbOWkTfi82mWC', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
-(16, 'Mellow Plays', 'mellowplays22@gmail.com', '$2y$10$eaJl391wb1qU2i.cKvNVUeKZYkb7TtxDiJC1Y8rV0PzJBsXk4SwVW', '2025-04-20 10:14:42', '9826455863', 'Dhapasi', 'Kathmandu', 1);
+(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$3VAevDXEDOpfq7MTjA0rQ.wsutF.XWSrOp7Cb9FxCFRJRzbKhiDLq', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
+(16, 'Mellow Plays', '', '$2y$10$eaJl391wb1qU2i.cKvNVUeKZYkb7TtxDiJC1Y8rV0PzJBsXk4SwVW', '2025-04-20 10:14:42', '9826455863', 'Dhapasi', 'Kathmandu', 1);
 
 --
 -- Indexes for dumped tables
@@ -514,7 +504,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `banners`
@@ -532,7 +522,7 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=128;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -556,7 +546,7 @@ ALTER TABLE `faqs`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=111;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT for table `order_items`

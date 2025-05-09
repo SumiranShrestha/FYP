@@ -40,13 +40,22 @@ $conn->close();
             font-size: 0.9rem;
             margin-top: 5px;
         }
+        /* Added CSS for error toast message */
+        #loginToast.toast {
+            background-color: #e53935 !important;
+            color: #fff !important;
+        }
     </style>
 </head>
 <body>
     <?php include("header.php"); ?>
 
     <div class="container mt-4">
-        <h2 class="text-center mb-4">Book an Appointment with Our Doctors</h2>
+        <?php if(isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'doctor'): ?>
+            <h2 class="text-center mb-4">View Available Doctors</h2>
+        <?php else: ?>
+            <h2 class="text-center mb-4">Book an Appointment with Our Doctors</h2>
+        <?php endif; ?>
         
         <?php if (empty($doctors)): ?>
             <div class="alert alert-warning text-center">
@@ -119,24 +128,30 @@ $conn->close();
                                             <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
-                                    <div class="mt-3">
-                                        <?php if ($is_available): ?>
-                                            <?php if (isset($_SESSION['user_id']) && (empty($_SESSION['user_type']) || $_SESSION['user_type'] === 'user')): ?>
-                                                <a href="book_appointment.php?doctor_id=<?= $doctor['id'] ?>" 
-                                                   class="btn btn-primary w-100 bookAppointmentBtn">
-                                                   Book Appointment
-                                                </a>
+
+                                    <?php 
+                                    // Only show booking functionality for non-doctor users
+                                    if (!(isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'doctor')): 
+                                    ?>
+                                        <div class="mt-3">
+                                            <?php if ($is_available): ?>
+                                                <?php if (isset($_SESSION['user_id']) && (empty($_SESSION['user_type']) || $_SESSION['user_type'] === 'user')): ?>
+                                                    <a href="book_appointment.php?doctor_id=<?= $doctor['id'] ?>" 
+                                                       class="btn btn-primary w-100 bookAppointmentBtn">
+                                                       Book Appointment
+                                                    </a>
+                                                <?php else: ?>
+                                                    <button class="btn btn-primary w-100 bookAppointmentBtn" type="button">
+                                                        Book Appointment
+                                                    </button>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                <button class="btn btn-primary w-100 bookAppointmentBtn" type="button">
-                                                    Book Appointment
+                                                <button class="btn btn-secondary w-100" disabled>
+                                                    Currently Unavailable
                                                 </button>
                                             <?php endif; ?>
-                                        <?php else: ?>
-                                            <button class="btn btn-secondary w-100" disabled>
-                                                Currently Unavailable
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -148,45 +163,37 @@ $conn->close();
 
     <?php include("footer.php"); ?>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-    #loginToast {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 9999;
-        min-width: 280px;
-    }
-    #loginToast.toast {
-        background-color: #e53935 !important;
-        color: #fff !important;
-
-    }
-    </style>
-    <!-- Toast for login required -->
-    <div class="toast align-items-center border-0" id="loginToast" role="alert" aria-live="assertive" aria-atomic="true" style="display:none;">
+    <?php if(!(isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'doctor')): ?>
+    <div class="toast align-items-center border-0" id="loginToast" role="alert" aria-live="assertive" aria-atomic="true" style="display:none; position: fixed; bottom: 30px; right: 30px; z-index: 9999; min-width: 280px;">
       <div class="d-flex">
         <div class="toast-body">
-          You must login to book appointment.
+          You must login to book an appointment.
         </div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
+    <?php endif; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <?php 
+    // Only include booking JS for non-doctor users
+    if (!(isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'doctor')): 
+    ?>
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('.bookAppointmentBtn').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 <?php if (!isset($_SESSION['user_id']) || (!empty($_SESSION['user_type']) && $_SESSION['user_type'] !== 'user')): ?>
                     e.preventDefault();
-                    // Show toast at bottom right
+                    // Show toast error message when not logged in
                     var toastEl = document.getElementById('loginToast');
                     toastEl.style.display = 'block';
                     var toast = new bootstrap.Toast(toastEl, { delay: 1800 });
                     toast.show();
-                    // After toast, open login modal
                     setTimeout(function() {
                         toast.hide();
-                        // If you have a login modal with id 'loginModal'
+                        // If login modal exists, show it; otherwise, redirect
                         var loginModal = document.getElementById('loginModal');
                         if (loginModal) {
                             var modal = new bootstrap.Modal(loginModal);
@@ -196,10 +203,10 @@ $conn->close();
                         }
                     }, 1800);
                 <?php endif; ?>
-                // If logged in as user, allow booking (do nothing)
             });
         });
     });
     </script>
+    <?php endif; ?>
 </body>
 </html>

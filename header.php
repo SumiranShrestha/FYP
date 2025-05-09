@@ -369,7 +369,7 @@ if (isset($_SESSION["user_id"])) {
                 $("#cartBadge").text(data.count).show();
             },
             error: function() {
-                toastr.error("Error fetching cart data!");
+                // toastr.error("Error fetching cart data!");
             }
         });
     }

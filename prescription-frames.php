@@ -11,7 +11,8 @@ $max_price = $_GET['max_price'] ?? 10000; // Set an arbitrary high price limit f
 $query = "SELECT p.*, b.brand_name 
           FROM products p 
           JOIN brands b ON p.brand_id = b.id
-          WHERE p.category_id = 4 
+          WHERE  
+            p.prescription_required = 1
           AND p.price BETWEEN ? AND ?
           AND (p.name LIKE ? OR b.brand_name LIKE ?)";
 $stmt = $conn->prepare($query);
@@ -55,61 +56,61 @@ if (isset($_SESSION['user_id'])) {
 
     <!-- Saved Prescriptions -->
     <?php if (!empty($prescriptions)): ?>
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5>Your Saved Prescriptions</h5>
-        </div>
-        <div class="card-body">
-            <div class="row row-cols-1 row-cols-md-3 g-3">
-                <?php foreach ($prescriptions as $prescription): ?>
-                <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h6 class="card-title">Prescription from <?= date('M d, Y', strtotime($prescription['created_at'])) ?></h6>
-                            <div class="row small">
-                                <div class="col-6">
-                                    <p class="mb-1"><strong>Right Eye:</strong></p>
-                                    <p>
-                                        SPH: <?= $prescription['right_eye_sphere'] ?><br>
-                                        CYL: <?= $prescription['right_eye_cylinder'] ?><br>
-                                        Axis: <?= $prescription['right_eye_axis'] ?>
-                                    </p>
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Your Saved Prescriptions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-3 g-3">
+                    <?php foreach ($prescriptions as $prescription): ?>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h6 class="card-title">Prescription from <?= date('M d, Y', strtotime($prescription['created_at'])) ?></h6>
+                                    <div class="row small">
+                                        <div class="col-6">
+                                            <p class="mb-1"><strong>Right Eye:</strong></p>
+                                            <p>
+                                                SPH: <?= $prescription['right_eye_sphere'] ?><br>
+                                                CYL: <?= $prescription['right_eye_cylinder'] ?><br>
+                                                Axis: <?= $prescription['right_eye_axis'] ?>
+                                            </p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="mb-1"><strong>Left Eye:</strong></p>
+                                            <p>
+                                                SPH: <?= $prescription['left_eye_sphere'] ?><br>
+                                                CYL: <?= $prescription['left_eye_cylinder'] ?><br>
+                                                Axis: <?= $prescription['left_eye_axis'] ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid mt-2">
+                                        <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Use This Prescription
+                                        </a>
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <p class="mb-1"><strong>Left Eye:</strong></p>
-                                    <p>
-                                        SPH: <?= $prescription['left_eye_sphere'] ?><br>
-                                        CYL: <?= $prescription['left_eye_cylinder'] ?><br>
-                                        Axis: <?= $prescription['left_eye_axis'] ?>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="d-grid mt-2">
-                                <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>" 
-                                   class="btn btn-sm btn-outline-primary">
-                                   Use This Prescription
-                                </a>
                             </div>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
-                <?php endforeach; ?>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
-        <?php foreach ($products as $product): 
+        <?php foreach ($products as $product):
             $images = json_decode($product['images'], true);
             $main_image = $images[0] ?? 'default-product.jpg';
         ?>
             <div class="col">
                 <div class="card h-100 product-card-custom">
                     <div class="position-relative overflow-hidden" style="height: 220px;">
-                        <img src="<?= htmlspecialchars($main_image) ?>" 
-                             class="card-img-top product-image"
-                             alt="<?= htmlspecialchars($product['name']) ?>">
+                        <img src="<?= htmlspecialchars($main_image) ?>"
+                            class="card-img-top product-image"
+                            alt="<?= htmlspecialchars($product['name']) ?>">
                     </div>
                     <div class="card-body text-center">
                         <h5 class="card-title product-title-custom mb-2"><?= htmlspecialchars($product['name']) ?></h5>
@@ -128,35 +129,35 @@ if (isset($_SESSION['user_id'])) {
                             <?php endif; ?>
                         </div>
                         <?php if ($product['discount_price'] > 0): ?>
-                        <div class="mb-2">
-                            <span class="badge save-badge-custom">
-                                SAVE <?= number_format($product['price'] - $product['discount_price']) ?>
-                            </span>
-                        </div>
+                            <div class="mb-2">
+                                <span class="badge save-badge-custom">
+                                    SAVE <?= number_format($product['price'] - $product['discount_price']) ?>
+                                </span>
+                            </div>
                         <?php endif; ?>
 
                         <div class="d-grid gap-2 mt-3">
-                            <a href="customize_prescription.php?product_id=<?= $product['id'] ?>" 
-                               class="btn btn-primary">
-                               Customize with Prescription
+                            <a href="customize_prescription.php?product_id=<?= $product['id'] ?>"
+                                class="btn btn-primary">
+                                Customize with Prescription
                             </a>
                             <?php if (!empty($prescriptions)): ?>
-                            <div class="dropdown">
-                                <button class="btn btn-outline-primary dropdown-toggle" type="button" 
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle" type="button"
                                         data-bs-toggle="dropdown">
-                                    Use Saved Prescription
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <?php foreach ($prescriptions as $prescription): ?>
-                                    <li>
-                                        <a class="dropdown-item" 
-                                           href="prescription_order.php?product_id=<?= $product['id'] ?>&prescription_id=<?= $prescription['id'] ?>">
-                                           <?= date('M d, Y', strtotime($prescription['created_at'])) ?>
-                                        </a>
-                                    </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
+                                        Use Saved Prescription
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <?php foreach ($prescriptions as $prescription): ?>
+                                            <li>
+                                                <a class="dropdown-item"
+                                                    href="prescription_order.php?product_id=<?= $product['id'] ?>&prescription_id=<?= $prescription['id'] ?>">
+                                                    <?= date('M d, Y', strtotime($prescription['created_at'])) ?>
+                                                </a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -178,24 +179,29 @@ if (isset($_SESSION['user_id'])) {
         border-radius: 10px 10px 0 0;
         padding: 10px;
     }
+
     .product-image:hover {
         transform: scale(1.05);
     }
+
     .product-card-custom {
         border-radius: 16px;
         border: none;
         margin-bottom: 10px;
         background: #fff;
     }
+
     .product-card-custom .card-body {
         padding: 1.2rem 1rem 1.5rem 1rem;
     }
+
     .card-title {
         font-weight: 700;
         color: #444;
         min-height: 48px;
         margin-bottom: 0.5rem;
     }
+
     .old-price-custom {
         color: #222;
         opacity: 0.7;
@@ -206,6 +212,7 @@ if (isset($_SESSION['user_id'])) {
         display: inline-flex;
         align-items: center;
     }
+
     .new-price-custom {
         color: #21b573;
         font-size: 1.25rem;
@@ -214,12 +221,14 @@ if (isset($_SESSION['user_id'])) {
         display: inline-flex;
         align-items: center;
     }
+
     .rupee-custom {
         font-family: Arial, sans-serif;
         font-weight: 700;
         font-size: 1.1em;
         margin-right: 2px;
     }
+
     .save-badge-custom {
         background: #4caf50;
         color: #fff;
@@ -230,17 +239,21 @@ if (isset($_SESSION['user_id'])) {
         letter-spacing: 1px;
         display: inline-block;
     }
+
     .text-success {
         color: #388e3c !important;
     }
+
     .text-decoration-line-through {
         color: #222 !important;
         opacity: 0.7;
     }
+
     mark {
         background-color: yellow;
         padding: 0;
     }
+
     .card {
         transition: box-shadow 0.3s ease;
     }
@@ -260,14 +273,14 @@ if (isset($_SESSION['user_id'])) {
         var max_value = document.getElementById('max_value');
         var min_price = document.getElementById('min_price');
         var max_price = document.getElementById('max_price');
-        
+
         var price_value = range.value;
         min_value.textContent = "Rs " + price_value;
         min_price.value = price_value;
         max_value.textContent = "Rs " + (parseInt(price_value) + 10000);
         max_price.value = parseInt(price_value) + 10000;
     }
-    
+
     // Initialize price range display
     document.addEventListener('DOMContentLoaded', function() {
         updatePriceRange();

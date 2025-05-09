@@ -21,6 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add_product"])) {
     $brand_id = $_POST["brand"] ?? null;
     $prescription_required = isset($_POST["prescription_required"]) ? 1 : 0;
     $stock = $_POST["stock"] ?? 10;
+    $facial_structure = $_POST["facial_structure"] ?? 'all';
 
     // Handle image uploads
     $uploaded_images = [];
@@ -42,12 +43,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["add_product"])) {
 
     // Insert product into the database
     $stmt = $conn->prepare("INSERT INTO products (name, price, discount_price, description, 
-                           category_id, brand_id, prescription_required, stock, images) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    
+                           category_id, brand_id, prescription_required, stock, images, facial_structure) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
     $images_json = json_encode($uploaded_images);
-    $stmt->bind_param("sdsssiiss", $name, $price, $discount_price, $description, 
-                     $category_id, $brand_id, $prescription_required, $stock, $images_json);
+    $stmt->bind_param(
+        "sdsssiisss",
+        $name,
+        $price,
+        $discount_price,
+        $description,
+        $category_id,
+        $brand_id,
+        $prescription_required,
+        $stock,
+        $images_json,
+        $facial_structure
+    );
 
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = "Product successfully added";
@@ -66,7 +78,7 @@ if (isset($_GET["delete_product"])) {
     $product_id = $_GET["delete_product"];
     $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
     $stmt->bind_param("i", $product_id);
-    
+
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = "Product successfully deleted";
         $_SESSION['alert_type'] = "success";
@@ -74,7 +86,7 @@ if (isset($_GET["delete_product"])) {
         $_SESSION['alert_message'] = "Error deleting product: " . $conn->error;
         $_SESSION['alert_type'] = "danger";
     }
-    
+
     header("Location: manage_products.php");
     exit();
 }
@@ -91,6 +103,7 @@ $result = $conn->query("
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,6 +117,7 @@ $result = $conn->query("
             width: 80px;
             height: auto;
         }
+
         .delete-btn {
             position: absolute;
             top: 5px;
@@ -120,15 +134,18 @@ $result = $conn->query("
             cursor: pointer;
             font-size: 10px;
         }
+
         .delete-btn:hover {
             background: rgba(255, 0, 0, 1);
         }
+
         .table-responsive {
             max-height: 600px;
             overflow-y: auto;
         }
     </style>
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
         <div class="container">
@@ -165,15 +182,16 @@ $result = $conn->query("
                 <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
             </a>
         </div>
-        
+
         <?php if (isset($_SESSION['alert_message'])): ?>
             <div class="alert alert-<?= $_SESSION['alert_type'] ?> alert-dismissible fade show" role="alert">
                 <?= $_SESSION['alert_message'] ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <?php unset($_SESSION['alert_message']); unset($_SESSION['alert_type']); ?>
+            <?php unset($_SESSION['alert_message']);
+            unset($_SESSION['alert_type']); ?>
         <?php endif; ?>
-        
+
         <div class="row">
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
@@ -186,7 +204,7 @@ $result = $conn->query("
                                 <label for="name" class="form-label">Product Name</label>
                                 <input type="text" class="form-control" id="name" name="name" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="brand" class="form-label">Brand</label>
                                 <select class="form-select" id="brand" name="brand">
@@ -198,7 +216,7 @@ $result = $conn->query("
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category</label>
                                 <select class="form-select" id="category" name="category">
@@ -212,37 +230,51 @@ $result = $conn->query("
                                     <?php endif; ?>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="price" class="form-label">Price (रू)</label>
                                 <input type="number" step="0.01" class="form-control" id="price" name="price" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="discount_price" class="form-label">Discount Price (रू)</label>
                                 <input type="number" step="0.01" class="form-control" id="discount_price" name="discount_price">
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Stock Quantity</label>
                                 <input type="number" class="form-control" id="stock" name="stock" value="10">
                             </div>
-                            
+
                             <div class="mb-3 form-check">
                                 <input type="checkbox" class="form-check-input" id="prescription_required" name="prescription_required">
                                 <label class="form-check-label" for="prescription_required">Prescription Required</label>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                             </div>
-                            
+
+                            <div class="mb-3">
+                                <label for="facial_structure" class="form-label">Best For Face Shape</label>
+                                <select class="form-select" id="facial_structure" name="facial_structure">
+                                    <option value="all" selected>All Face Shapes</option>
+                                    <option value="round">Round</option>
+                                    <option value="oval">Oval</option>
+                                    <option value="square">Square</option>
+                                    <option value="heart">Heart</option>
+                                    <option value="diamond">Diamond</option>
+                                    <option value="triangle">Triangle</option>
+                                </select>
+                                <div class="form-text">Select which face shape this product is best suited for</div>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="images" class="form-label">Product Images</label>
                                 <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
                             </div>
-                            
+
                             <button type="submit" name="add_product" class="btn btn-success w-100">
                                 <i class="bi bi-plus-lg me-1"></i>Add Product
                             </button>
@@ -250,7 +282,7 @@ $result = $conn->query("
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -272,6 +304,7 @@ $result = $conn->query("
                                         <th>Category</th>
                                         <th>Price</th>
                                         <th>Stock</th>
+                                        <th>Face Shape</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
@@ -281,9 +314,9 @@ $result = $conn->query("
                                             <tr>
                                                 <td><?= $product['id']; ?></td>
                                                 <td>
-                                                    <?php 
-                                                        $images = json_decode($product['images'], true);
-                                                        if (!empty($images)): ?>
+                                                    <?php
+                                                    $images = json_decode($product['images'], true);
+                                                    if (!empty($images)): ?>
                                                         <img src="<?= $images[0]; ?>" alt="Product Image" class="img-thumbnail">
                                                     <?php endif; ?>
                                                 </td>
@@ -299,6 +332,16 @@ $result = $conn->query("
                                                     <?php endif; ?>
                                                 </td>
                                                 <td><?= $product['stock']; ?></td>
+                                                <td>
+                                                    <?php
+                                                    $faceShape = $product['facial_structure'] ?? 'all';
+                                                    if ($faceShape == 'all') {
+                                                        echo 'All Shapes';
+                                                    } else {
+                                                        echo ucfirst($faceShape);
+                                                    }
+                                                    ?>
+                                                </td>
                                                 <td class="text-center">
                                                     <div class="btn-group btn-group-sm">
                                                         <a href="edit_product.php?id=<?= $product['id']; ?>" class="btn btn-primary">
@@ -307,9 +350,9 @@ $result = $conn->query("
                                                         <a href="view_product.php?id=<?= $product['id']; ?>" class="btn btn-info">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
-                                                        <a href="manage_products.php?delete_product=<?= $product['id']; ?>" 
-                                                           class="btn btn-danger" 
-                                                           onclick="return confirm('Are you sure you want to delete this product?')">
+                                                        <a href="manage_products.php?delete_product=<?= $product['id']; ?>"
+                                                            class="btn btn-danger"
+                                                            onclick="return confirm('Are you sure you want to delete this product?')">
                                                             <i class="bi bi-trash"></i>
                                                         </a>
                                                     </div>
@@ -318,7 +361,7 @@ $result = $conn->query("
                                         <?php endwhile; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="8" class="text-center py-4">No products found</td>
+                                            <td colspan="9" class="text-center py-4">No products found</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
@@ -364,4 +407,5 @@ $result = $conn->query("
         });
     </script>
 </body>
+
 </html>

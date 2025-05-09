@@ -42,10 +42,15 @@ $appointments = $appointments_stmt->get_result();
     <title>Doctor Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .status-pending { background-color: #fff3cd; }
-        .status-confirmed { background-color: #d1e7dd; }
-        .status-completed { background-color: #cfe2ff; }
-        .status-cancelled { background-color: #f8d7da; }
+        .status-pending { background-color: #FFC107; }
+        .status-confirmed { background-color: #0DCAF0; }
+        .status-completed { background-color: #198754; }
+        .status-cancelled { background-color: #DC3545; }
+        /* Added new style for All Appointments header */
+        .all-appointments-header { 
+            background-color: #E673DE !important; 
+            color: #fff !important; 
+        }
     </style>
 </head>
 <body>
@@ -72,7 +77,8 @@ $appointments = $appointments_stmt->get_result();
             <!-- All Appointments -->
             <div class="col-md-8">
                 <div class="card">
-                    <div class="card-header bg-info text-white">
+                    <!-- Updated card header to use the new style -->
+                    <div class="card-header all-appointments-header">
                         <h5 class="card-title">All Appointments</h5>
                     </div>
                     <div class="card-body">
@@ -180,4 +186,4 @@ $appointments = $appointments_stmt->get_result();
         });
     </script>
 </body>
-</html> 
+</html>

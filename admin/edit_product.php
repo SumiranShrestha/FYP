@@ -36,6 +36,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
     $prescription_required = isset($_POST["prescription_required"]) ? 1 : 0;
     $stock = $_POST["stock"] ?? 10;
     $product_id = $_POST["product_id"];
+    $facial_structure = $_POST["facial_structure"] ?? 'all';
 
     // Validate the brand_id if provided
     if ($brand_id !== null) {
@@ -110,14 +111,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                             brand_id = ?,
                             prescription_required = ?,
                             stock = ?,
-                            images = ? 
+                            images = ?,
+                            facial_structure = ? 
                             WHERE id = ?");
-    
+
     $images_json = json_encode($updated_images);
-    $stmt->bind_param("sdsssiissi", 
-        $name, $price, $discount_price, $description, 
-        $category_id, $brand_id, $prescription_required, $stock,
-        $images_json, $product_id);
+    $stmt->bind_param(
+        "sdsssiisssi",
+        $name,
+        $price,
+        $discount_price,
+        $description,
+        $category_id,
+        $brand_id,
+        $prescription_required,
+        $stock,
+        $images_json,
+        $facial_structure,
+        $product_id
+    );
 
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = "Product successfully updated";
@@ -134,6 +146,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -147,6 +160,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
             width: 100px;
             height: auto;
         }
+
         .delete-btn {
             position: absolute;
             top: 5px;
@@ -162,11 +176,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
             justify-content: center;
             cursor: pointer;
         }
+
         .delete-btn:hover {
             background: rgba(255, 0, 0, 1);
         }
     </style>
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
@@ -204,15 +220,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                 <i class="bi bi-arrow-left me-1"></i>Back to Products
             </a>
         </div>
-        
+
         <?php if (isset($_SESSION['alert_message'])): ?>
             <div class="alert alert-<?= $_SESSION['alert_type'] ?> alert-dismissible fade show" role="alert">
                 <?= $_SESSION['alert_message'] ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <?php unset($_SESSION['alert_message']); unset($_SESSION['alert_type']); ?>
+            <?php unset($_SESSION['alert_message']);
+            unset($_SESSION['alert_type']); ?>
         <?php endif; ?>
-        
+
         <div class="card shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="card-title mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Product</h5>
@@ -220,35 +237,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
             <div class="card-body">
                 <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="name" class="form-label">Product Name</label>
-                                <input type="text" class="form-control" id="name" name="name" 
-                                       value="<?= htmlspecialchars($product['name']); ?>" required>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    value="<?= htmlspecialchars($product['name']); ?>" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="brand" class="form-label">Brand</label>
                                 <select class="form-select" id="brand" name="brand">
                                     <option value="">Select brand</option>
                                     <?php while ($brand = $brands_result->fetch_assoc()): ?>
-                                        <option value="<?= $brand['id']; ?>" 
+                                        <option value="<?= $brand['id']; ?>"
                                             <?= $product['brand_id'] == $brand['id'] ? 'selected' : ''; ?>>
                                             <?= htmlspecialchars($brand['brand_name']); ?>
                                         </option>
                                     <?php endwhile; ?>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category</label>
                                 <select class="form-select" id="category" name="category">
                                     <option value="">Select category</option>
                                     <?php if ($categories_result->num_rows > 0): ?>
                                         <?php while ($category = $categories_result->fetch_assoc()): ?>
-                                            <option value="<?= $category['id']; ?>" 
+                                            <option value="<?= $category['id']; ?>"
                                                 <?= $product['category_id'] == $category['id'] ? 'selected' : ''; ?>>
                                                 <?= htmlspecialchars($category['name']); ?>
                                             </option>
@@ -256,63 +273,77 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                                     <?php endif; ?>
                                 </select>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="price" class="form-label">Price (रू)</label>
-                                <input type="number" step="0.01" class="form-control" id="price" name="price" 
-                                       value="<?= $product['price']; ?>" required>
+                                <input type="number" step="0.01" class="form-control" id="price" name="price"
+                                    value="<?= $product['price']; ?>" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="facial_structure" class="form-label">Best For Face Shape</label>
+                                <select class="form-select" id="facial_structure" name="facial_structure">
+                                    <option value="all" <?= (!isset($product['facial_structure']) || $product['facial_structure'] == 'all') ? 'selected' : ''; ?>>All Face Shapes</option>
+                                    <option value="round" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'round') ? 'selected' : ''; ?>>Round</option>
+                                    <option value="oval" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'oval') ? 'selected' : ''; ?>>Oval</option>
+                                    <option value="square" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'square') ? 'selected' : ''; ?>>Square</option>
+                                    <option value="heart" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'heart') ? 'selected' : ''; ?>>Heart</option>
+                                    <option value="diamond" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'diamond') ? 'selected' : ''; ?>>Diamond</option>
+                                    <option value="triangle" <?= (isset($product['facial_structure']) && $product['facial_structure'] == 'triangle') ? 'selected' : ''; ?>>Triangle</option>
+                                </select>
+                                <div class="form-text">Select which face shape this product is best suited for</div>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="discount_price" class="form-label">Discount Price (रू)</label>
-                                <input type="number" step="0.01" class="form-control" id="discount_price" name="discount_price" 
-                                       value="<?= $product['discount_price']; ?>">
+                                <input type="number" step="0.01" class="form-control" id="discount_price" name="discount_price"
+                                    value="<?= $product['discount_price']; ?>">
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Stock Quantity</label>
-                                <input type="number" class="form-control" id="stock" name="stock" 
-                                       value="<?= $product['stock']; ?>">
+                                <input type="number" class="form-control" id="stock" name="stock"
+                                    value="<?= $product['stock']; ?>">
                             </div>
-                            
+
                             <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="prescription_required" name="prescription_required" 
-                                       <?= $product['prescription_required'] ? 'checked' : ''; ?>>
+                                <input type="checkbox" class="form-check-input" id="prescription_required" name="prescription_required"
+                                    <?= $product['prescription_required'] ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="prescription_required">Prescription Required</label>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description</label>
                                 <textarea class="form-control" id="description" name="description" rows="5"><?= htmlspecialchars($product['description']); ?></textarea>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Existing Images</label>
                         <div class="d-flex flex-wrap">
                             <?php
-                                $images = json_decode($product['images'], true);
-                                foreach ($images as $image): ?>
+                            $images = json_decode($product['images'], true);
+                            foreach ($images as $image): ?>
                                 <div style="position: relative; margin: 5px;">
                                     <img src="<?= $image; ?>" alt="Product Image" class="img-thumbnail">
-                                    <a href="delete_image.php?product_id=<?= $product['id']; ?>&image_url=<?= urlencode($image); ?>" 
-                                       class="delete-btn" 
-                                       onclick="return confirm('Are you sure you want to delete this image?')">
+                                    <a href="delete_image.php?product_id=<?= $product['id']; ?>&image_url=<?= urlencode($image); ?>"
+                                        class="delete-btn"
+                                        onclick="return confirm('Are you sure you want to delete this image?')">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="images" class="form-label">Add More Images</label>
                         <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
                     </div>
-                    
+
                     <button type="submit" name="update_product" class="btn btn-primary w-100">
                         <i class="bi bi-save me-1"></i>Update Product
                     </button>
@@ -323,4 +354,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

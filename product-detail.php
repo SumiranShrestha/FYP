@@ -5,7 +5,7 @@ include('header.php');
 
 // Ensure session is started
 if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+  session_start();
 }
 
 // Database connection
@@ -16,7 +16,7 @@ $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
 // Fetch product details
 $stmt = $conn->prepare("
-    SELECT p.*, b.brand_name 
+    SELECT p.*, b.brand_name, p.facial_structure
     FROM products p 
     JOIN brands b ON p.brand_id = b.id 
     WHERE p.id = ?
@@ -28,9 +28,9 @@ $product = $result->fetch_assoc();
 
 // Ensure product exists
 if (!$product) {
-    echo "<p class='text-center text-danger'>Product not found.</p>";
-    include('footer.php');
-    exit();
+  echo "<p class='text-center text-danger'>Product not found.</p>";
+  include('footer.php');
+  exit();
 }
 
 // Decode JSON images
@@ -38,6 +38,7 @@ $images = json_decode($product['images'], true);
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -49,130 +50,197 @@ $images = json_decode($product['images'], true);
 
   <style>
     /* Floating Cart Icon */
+    /* Removed #floatingCart and #cartBadge styles */
+    /*
     #floatingCart {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #28a745;
-        color: white;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        cursor: pointer;
-        z-index: 1050;
-    }
-    #cartBadge {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: red;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 5px 8px;
-        border-radius: 50%;
-        display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 1050;
     }
 
+    #cartBadge {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: red;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 5px 8px;
+      border-radius: 50%;
+      display: none;
+    }
+    */
     /* Offcanvas Cart Drawer */
     .cart-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #ddd;
     }
+
     .cart-item img {
-        width: 50px;
-        height: 50px;
-        object-fit: contain;
-        border-radius: 5px;
-        margin-right: 10px;
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 5px;
+      margin-right: 10px;
     }
+
     .cart-footer {
-        border-top: 1px solid #ddd;
-        padding-top: 15px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
     }
 
     /* Quantity Selector */
+    .qty-selector-group {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .qty-btn,
     #quantitySelect {
-        width: 60px;
-        text-align: center;
-        font-size: 14px;
-        padding: 5px;
+      width: 55px;
+      height: 55px;
+      font-size: 1.5rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: none;
+      outline: none;
+      transition: border 0.15s;
+    }
+
+    .qty-btn {
+      cursor: pointer;
+      user-select: none;
+      font-weight: 400;
+      color: #222;
+      padding: 0;
+    }
+
+    .qty-btn:active {
+      border-color: #21b573;
+    }
+
+    #quantitySelect {
+      pointer-events: none;
+      border: 1px solid #e5e7eb;
+      background: #fff;
+      font-weight: 500;
+      color: #222;
+      font-size: 1.5rem;
+    }
+
+    .btn-out-of-stock {
+      background: #f5f6f7 !important;
+      color: #b0b7bc !important;
+      border: none !important;
+      font-weight: 700;
+      letter-spacing: 1px;
+      pointer-events: none;
+      box-shadow: none !important;
     }
 
     /* Product Detail */
     .product-detail-imagebox {
-        width: 100%;
-        max-width: 520px;
-        aspect-ratio: 1/1;
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+      width: 100%;
+      max-width: 520px;
+      aspect-ratio: 1/1;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
+
     .main-product-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 16px;
-        transition: box-shadow 0.2s;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+      transition: box-shadow 0.2s;
     }
+
     .product-thumbs-row {
-        margin-top: 10px;
-        gap: 18px !important;
+      margin-top: 10px;
+      gap: 18px !important;
     }
+
     .thumb-wrapper {
-        border-radius: 10px;
-        overflow: hidden;
-        border: 2px solid transparent;
-        transition: border 0.18s;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border 0.18s;
     }
+
     .product-thumb-img {
-        width: 90px;
-        height: 90px;
-        object-fit: cover;
-        border-radius: 10px;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: border 0.18s, box-shadow 0.18s;
-        background: #fff;
-        box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border 0.18s, box-shadow 0.18s;
+      background: #fff;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
     }
+
     .product-thumb-img.active-thumb,
     .product-thumb-img:hover {
-        border: 2px solid #21b573 !important;
-        box-shadow: 0 0 0 2px #b2f5ea;
+      border: 2px solid #21b573 !important;
+      box-shadow: 0 0 0 2px #b2f5ea;
     }
+
     @media (max-width: 991px) {
-        .main-product-image, .product-detail-imagebox {
-            max-width: 100vw;
-            height: auto;
-        }
-        .product-thumb-img {
-            width: 60px;
-            height: 60px;
-        }
+
+      .main-product-image,
+      .product-detail-imagebox {
+        max-width: 100vw;
+        height: auto;
+      }
+
+      .product-thumb-img {
+        width: 60px;
+        height: 60px;
+      }
+    }
+
+    .btn-out-of-stock {
+      background: #f5f6f7 !important;
+      color: #b0b7bc !important;
+      border: none !important;
+      font-weight: 700;
+      letter-spacing: 1px;
+      pointer-events: none;
+      box-shadow: none !important;
     }
   </style>
 </head>
-<body>
 
-  <!-- Floating Cart Icon -->
-  <div id="floatingCart" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer">
-    <i class="bi bi-cart-fill"></i>
-    <span id="cartBadge">0</span>
-  </div>
+<body>
 
   <!-- Offcanvas Cart Drawer -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="cartDrawer">
@@ -206,8 +274,7 @@ $images = json_decode($product['images'], true);
             id="mainProductImage"
             src="<?= htmlspecialchars($images[0]); ?>"
             alt="Product Image"
-            class="main-product-image"
-          >
+            class="main-product-image">
         </div>
         <div class="d-flex flex-wrap gap-3 justify-content-center product-thumbs-row">
           <?php foreach ($images as $index => $img): ?>
@@ -215,8 +282,7 @@ $images = json_decode($product['images'], true);
               <img
                 src="<?= htmlspecialchars($img); ?>"
                 class="product-thumb-img <?= $index === 0 ? 'active-thumb' : '' ?>"
-                onclick="setMainImage(this, '<?= htmlspecialchars($img); ?>')"
-              >
+                onclick="setMainImage(this, '<?= htmlspecialchars($img); ?>')">
             </div>
           <?php endforeach; ?>
         </div>
@@ -247,13 +313,37 @@ $images = json_decode($product['images'], true);
         <div class="mb-2" style="color:#888;font-size:0.95rem;">
           Shipping is calculated at checkout
         </div>
+        <!-- Facial Structure Compatibility -->
+        <?php if (isset($product['facial_structure']) && $product['facial_structure'] != ''): ?>
+          <div class="d-flex align-items-center mb-3 mt-3">
+            <div class="fw-bold me-2" style="font-size:1.1rem;">Best For Face Shape:</div>
+            <div class="d-flex flex-wrap gap-2">
+              <?php
+              $faceShape = $product['facial_structure'];
+              if ($faceShape == 'all') {
+                echo '<span class="badge bg-success p-2">Suits All Face Shapes</span>';
+              } else {
+                $faceShapes = ['round', 'oval', 'square', 'heart', 'diamond', 'triangle'];
+                foreach ($faceShapes as $shape) {
+                  $active = ($faceShape == $shape) ? 'bg-success' : 'bg-secondary';
+                  echo '<span class="badge ' . $active . ' p-2">' . ucfirst($shape) . '</span>';
+                }
+              }
+              ?>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <!-- Quantity & Add to Cart -->
-        <div class="d-flex align-items-center gap-2 mb-4">
-          <button class="btn btn-outline-secondary px-3 py-2" type="button" onclick="changeQty(-1)">−</button>
-          <input type="number" id="quantitySelect" class="form-control text-center" value="1" min="1">
-          <button class="btn btn-outline-secondary px-3 py-2" type="button" onclick="changeQty(1)">+</button>
-          <button class="btn btn-success flex-grow-1 fw-bold ms-2 add-to-cart-btn" data-id="<?= $product_id; ?>" style="height:48px;font-size:1.1rem;">
+        <div class="qty-selector-group">
+          <button class="qty-btn" type="button" onclick="changeQty(-1)">−</button>
+          <input type="number" id="quantitySelect" value="1" min="1" readonly>
+          <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
+          <button
+            class="btn btn-success flex-grow-1 fw-bold ms-2 add-to-cart-btn"
+            data-id="<?= $product_id; ?>"
+            data-stock="<?= (int)$product['stock']; ?>"
+            style="height:64px;font-size:1.1rem;">
             ADD TO CART
           </button>
         </div>
@@ -270,22 +360,7 @@ $images = json_decode($product['images'], true);
           </div>
         </div>
 
-        <!-- Key Features & Size Details -->
-        <div class="mb-3">
-          <div class="fw-bold" style="font-size:1.1rem;">Key Features:</div>
-          <ul style="font-size:1rem;">
-            <li><b>UV Protection:</b> 100% UVA/UVB protection.</li>
-            <li><b>Material:</b> Premium acetate frame.</li>
-            <li><b>Lens Type:</b> Gradient lenses to reduce glare.</li>
-            <li><b>Design:</b> Sleek and timeless, fits every face shape.</li>
-          </ul>
-          <div class="fw-bold" style="font-size:1.1rem;">Size Details:</div>
-          <ul style="font-size:1rem;">
-            <li><b>Lens Width:</b> 52 mm</li>
-            <li><b>Bridge Width:</b> 21 mm</li>
-            <li><b>Temple Length:</b> 145 mm</li>
-          </ul>
-        </div>
+
       </div>
     </div>
   </div>
@@ -307,6 +382,20 @@ $images = json_decode($product['images'], true);
       let val = parseInt(qtyInput.value, 10) || 1;
       val = Math.max(1, val + delta);
       qtyInput.value = val;
+      const addToCartBtn = document.querySelector('.add-to-cart-btn');
+      const availableStock = parseInt(addToCartBtn.getAttribute('data-stock'), 10);
+
+      if (val > availableStock || availableStock === 0) {
+        addToCartBtn.textContent = "OUT OF STOCK";
+        addToCartBtn.classList.remove("btn-success");
+        addToCartBtn.classList.add("btn-out-of-stock");
+        addToCartBtn.disabled = true;
+      } else {
+        addToCartBtn.textContent = "ADD TO CART";
+        addToCartBtn.classList.remove("btn-out-of-stock");
+        addToCartBtn.classList.add("btn-success");
+        addToCartBtn.disabled = false;
+      }
     }
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -368,48 +457,55 @@ $images = json_decode($product['images'], true);
         const pid = this.dataset.id;
         const qty = document.getElementById("quantitySelect").value;
         fetch("server/add_to_cart.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `product_id=${pid}&quantity=${qty}`
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === "success") {
-            showToast("Product added to cart!", "success");
-            updateCart();
-          } else {
-            showToast("Failed to add product.", "danger");
-          }
-        })
-        .catch(() => showToast("Error adding to cart!", "danger"));
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `product_id=${pid}&quantity=${qty}`
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === "success") {
+              showToast("Product added to cart!", "success");
+              updateCart();
+            } else {
+              showToast("Failed to add product.", "danger");
+            }
+          })
+          .catch(() => showToast("Error adding to cart!", "danger"));
       });
 
       document.getElementById("cartItemsContainer").addEventListener("click", function(e) {
         if (e.target.classList.contains("remove-item")) {
           const pid = e.target.dataset.id;
           fetch("server/remove_from_cart.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `product_id=${pid}`
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.status === "success") {
-              showToast("Removed from cart!", "warning");
-              updateCart();
-            } else {
-              showToast("Failed to remove item.", "danger");
-            }
-          })
-          .catch(() => showToast("Error removing item!", "danger"));
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              body: `product_id=${pid}`
+            })
+            .then(res => res.json())
+            .then(data => {
+              if (data.status === "success") {
+                showToast("Removed from cart!", "warning");
+                updateCart();
+              } else {
+                showToast("Failed to remove item.", "danger");
+              }
+            })
+            .catch(() => showToast("Error removing item!", "danger"));
         }
       });
 
       updateCart();
+      // On page load, check if out of stock
+      changeQty(0);
     });
   </script>
 
   <!-- Bootstrap JS bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

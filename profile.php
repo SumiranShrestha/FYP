@@ -76,6 +76,7 @@ unset($_SESSION['alert_type']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -87,13 +88,16 @@ unset($_SESSION['alert_type']);
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
         .appointment-card {
             transition: all 0.3s ease;
         }
+
         .appointment-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
         }
+
         /* Update nav-pills active tab color and text color */
         .nav-pills .nav-link.active {
             background-color: #E673DE !important;
@@ -101,11 +105,12 @@ unset($_SESSION['alert_type']);
         }
     </style>
 </head>
+
 <body>
     <div class="container py-5">
         <!-- Display Success or Error Messages -->
         <?php if ($alert_message) : ?>
-            <div class="alert alert-<?= $alert_type; ?> alert-dismissible fade show" role="alert">
+            <div class="alert alert-<?= $alert_type; ?> alert-dismissible fade show position-fixed end-0 bottom-0 m-4" style="z-index: 1055; min-width:300px; max-width:350px;" role="alert" id="profileAlert">
                 <?= htmlspecialchars($alert_message); ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -121,7 +126,7 @@ unset($_SESSION['alert_type']);
                     <div class="card-body">
                         <div class="text-center mb-4">
                         </div>
-                        
+
                         <?php if ($user_type === 'doctor' && !empty($doctor)): ?>
                             <h5 class="card-title"><?= htmlspecialchars($doctor['full_name'] ?? 'Doctor') ?></h5>
                             <p class="text-muted mb-1"><i class="bi bi-envelope"></i> <?= htmlspecialchars($doctor['email'] ?? 'No email') ?></p>
@@ -137,12 +142,12 @@ unset($_SESSION['alert_type']);
                             <p class="text-muted mb-1"><i class="bi bi-telephone"></i> <?= htmlspecialchars($user['phone'] ?? 'No phone') ?></p>
                             <p class="text-muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars(($user['address'] ?? 'No address') . ', ' . ($user['city'] ?? '')) ?></p>
                         <?php endif; ?>
-                        
+
                         <a href="edit_profile.php" class="btn btn-outline-primary mt-3 w-100">Edit Profile</a>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Right column: Tabs for Profile, Orders, and Appointments -->
             <div class="col-lg-8">
                 <ul class="nav nav-pills mb-4" id="profileTabs" role="tablist">
@@ -168,40 +173,64 @@ unset($_SESSION['alert_type']);
                     <div class="tab-pane fade show active" id="profile" role="tabpanel">
                         <div class="card profile-card">
                             <div class="card-body">
-                                <form method="POST" action="update_profile.php">
+                                <?php if ($user_type === 'doctor' && !empty($doctor)): ?>
+                                    <h5 class="mb-3">Doctor Profile Details</h5>
                                     <div class="mb-3">
                                         <label class="form-label">Full Name</label>
-                                        <input type="text" name="user_name" class="form-control" vale="<?= htmlspecialchars($user['user_name'] ?? ''); ?>" required />                                    </div>
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($doctor['full_name'] ?? ''); ?>" readonly />
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label">Email</label>
-                                        <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user['user_email'] ?? ''); ?>" required />
+                                        <input type="email" class="form-control" value="<?= htmlspecialchars($doctor['email'] ?? ''); ?>" readonly />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Phone</label>
-                                        <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" />
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($doctor['phone'] ?? ''); ?>" readonly />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Address</label>
-                                        <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user['address'] ?? ''); ?>" />
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($doctor['address'] ?? ''); ?>" readonly />
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">City</label>
-                                        <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user['city'] ?? ''); ?>" />
+                                        <input type="text" class="form-control" value="<?= htmlspecialchars($doctor['city'] ?? ''); ?>" readonly />
                                     </div>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-1"></i>Update Profile
-                                    </button>
-                                </form>
-
+                                <?php else: ?>
+                                    <form method="POST" action="update_profile.php">
+                                        <div class="mb-3">
+                                            <label class="form-label">Full Name</label>
+                                            <input type="text" name="user_name" class="form-control" value="<?= htmlspecialchars($user['user_name'] ?? ''); ?>" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" name="user_email" class="form-control" value="<?= htmlspecialchars($user['user_email'] ?? ''); ?>" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Phone</label>
+                                            <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Address</label>
+                                            <input type="text" name="address" class="form-control" value="<?= htmlspecialchars($user['address'] ?? ''); ?>" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">City</label>
+                                            <input type="text" name="city" class="form-control" value="<?= htmlspecialchars($user['city'] ?? ''); ?>" />
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-1"></i>Update Profile
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
                                 <?php if ($user_type === 'doctor' && !empty($doctor)): ?>
                                     <hr class="my-4">
                                     <h5 class="mb-3">Update Availability</h5>
                                     <?php
-                                        // Parse availability JSON if present
-                                        $availability = [];
-                                        if (!empty($doctor['availability'])) {
-                                            $availability = json_decode($doctor['availability'], true);
-                                        }
+                                    // Parse availability JSON if present
+                                    $availability = [];
+                                    if (!empty($doctor['availability'])) {
+                                        $availability = json_decode($doctor['availability'], true);
+                                    }
                                     ?>
                                     <form method="POST" action="update_availability.php">
                                         <div class="mb-3">
@@ -209,9 +238,9 @@ unset($_SESSION['alert_type']);
                                             <select name="day" class="form-select" required>
                                                 <option value="">Select Day</option>
                                                 <?php
-                                                $days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                                                $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                                 foreach ($days as $day) {
-                                                    echo '<option value="'.$day.'">'.$day.'</option>';
+                                                    echo '<option value="' . $day . '">' . $day . '</option>';
                                                 }
                                                 ?>
                                             </select>
@@ -298,8 +327,7 @@ unset($_SESSION['alert_type']);
                                                         <td>Rs <?= number_format($order['total_price'], 2); ?></td>
                                                         <td>
                                                             <span class="badge 
-                                                                <?= $order['status'] === 'delivered' ? 'bg-success' : 
-                                                                   ($order['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
+                                                                <?= $order['status'] === 'delivered' ? 'bg-success' : ($order['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
                                                                 <?= ucfirst($order['status']) ?>
                                                             </span>
                                                         </td>
@@ -341,24 +369,32 @@ unset($_SESSION['alert_type']);
                                                         <td><?= htmlspecialchars($appointment[$user_type === 'doctor' ? 'patient_name' : 'doctor_name']); ?></td>
                                                         <td>
                                                             <span class="badge 
-                                                                <?= $appointment['status'] === 'completed' ? 'bg-success' : 
-                                                                   ($appointment['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
+                                                                <?= $appointment['status'] === 'completed' ? 'bg-success' : ($appointment['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
                                                                 <?= ucfirst($appointment['status']) ?>
                                                             </span>
                                                         </td>
                                                         <td>
-                                                              <?php
-                                                                $detailPage = $user_type === 'doctor'
-                                                                    ? 'doctor_appointment.php'
-                                                                    : 'my_appointments.php';
-                                                        ?>
-                                                        <a href="<?= $detailPage ?>?id=<?= $appointment['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                                            View
-                                                        </a>
-                                                        <?php if ($appointment['status'] === 'pending'): ?>
-                                                            <a href="cancel_appointment.php?id=<?= $appointment['id'] ?>" class="btn btn-sm btn-outline-danger">
-                                                                Cancel
+                                                            <?php
+                                                            $detailPage = $user_type === 'doctor'
+                                                                ? 'doctor_appointment.php'
+                                                                : 'my_appointments.php';
+                                                            ?>
+                                                            <a href="<?= $detailPage ?>?id=<?= $appointment['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-eye"></i> View
                                                             </a>
+                                                            <?php if ($appointment['status'] === 'pending' || $appointment['status'] === 'confirmed'): ?>
+                                                                <button class="btn btn-sm btn-outline-danger cancel-btn"
+                                                                    data-appointment-id="<?= $appointment['id'] ?>">
+                                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                                </button>
+                                                            <?php elseif ($appointment['status'] == 'cancelled'): ?>
+                                                                <button class="btn btn-sm btn-outline-danger" disabled>
+                                                                    <i class="bi bi-slash-circle"></i> Cancelled
+                                                                </button>
+                                                            <?php elseif ($appointment['status'] == 'completed'): ?>
+                                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                                    <i class="bi bi-check-circle"></i> Completed
+                                                                </button>
                                                             <?php endif; ?>
                                                         </td>
                                                     </tr>
@@ -377,17 +413,124 @@ unset($_SESSION['alert_type']);
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+        toastContainer.style.zIndex = '1100';
+        document.body.appendChild(toastContainer);
+
+        // Handle cancel button clicks
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                let btn = this;
+                let appointmentId = btn.getAttribute('data-appointment-id');
+                //display appointment id
+                console.log('Appointment ID:', appointmentId);
+                // Validate appointment ID
+                if (!appointmentId || isNaN(appointmentId)) {
+                    showToast('Invalid appointment selected. Please refresh the page and try again.', 'danger');
+                    return;
+                }
+                let row = btn.closest('tr');
+                let originalButtonHTML = btn.innerHTML;
+
+                if (confirm("Are you sure you want to cancel this appointment?")) {
+                    // Change button appearance
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cancelling...';
+                    btn.disabled = true;
+
+                    // Make AJAX request
+                    fetch('server/cancel_appointment.php?id=' + encodeURIComponent(appointmentId), {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show success message
+                                showToast(data.message, 'success');
+
+                                // Update the row appearance
+                                row.querySelector('.badge').className = 'badge bg-danger';
+                                row.querySelector('.badge').textContent = 'Cancelled';
+                                btn.remove();
+
+                                // Add cancelled button
+                                const cancelledBtn = document.createElement('button');
+                                cancelledBtn.className = 'btn btn-sm btn-outline-danger';
+                                cancelledBtn.disabled = true;
+                                cancelledBtn.innerHTML = '<i class="bi bi-slash-circle"></i> Cancelled';
+                                row.querySelector('td:last-child').appendChild(cancelledBtn);
+                            } else {
+                                // Reset button state
+                                btn.innerHTML = originalButtonHTML;
+                                btn.disabled = false;
+                                showToast(data.message, 'danger');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            btn.innerHTML = originalButtonHTML;
+                            btn.disabled = false;
+                            showToast('An error occurred while cancelling the appointment', 'danger');
+                        });
+                }
+            });
+        });
+
+        function showToast(message, type) {
+            const toastId = 'toast-' + Date.now();
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.id = toastId;
+
+            toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        `;
+
+            toastContainer.appendChild(toast);
+
+            // Show the toast
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                bsToast.hide();
+            }, 5000);
+        }
         // Initialize tab functionality
         const profileTabs = document.querySelector('#profileTabs');
         if (profileTabs) {
             const tab = new bootstrap.Tab(profileTabs.querySelector('button[data-bs-target="#profile"]'));
             tab.show();
         }
+
+        // Auto-hide alert after 3 seconds
+        document.addEventListener("DOMContentLoaded", function() {
+            var alertBox = document.getElementById('profileAlert');
+            if (alertBox) {
+                setTimeout(function() {
+                    var alert = bootstrap.Alert.getOrCreateInstance(alertBox);
+                    alert.close();
+                }, 3000);
+            }
+        });
     </script>
 </body>
+
 </html>
 
-<?php 
+<?php
 $conn->close();
-include('footer.php'); 
+include('footer.php');
 ?>
