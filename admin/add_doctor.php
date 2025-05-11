@@ -15,21 +15,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
     $phone = $_POST['phone'];
     $nmc_number = $_POST['nmc_number'];
     $specialization = $_POST['specialization'];
-    $availability = json_encode($_POST['availability']); // Convert array to JSON
 
-    // Insert doctor into the `doctors` table
-    $stmt = $conn->prepare("INSERT INTO doctors (full_name, email, password, phone, nmc_number, specialization, availability) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssss", $full_name, $email, $password, $phone, $nmc_number, $specialization, $availability);
-
-    if ($stmt->execute()) {
-        $_SESSION['alert_message'] = "Doctor created successfully";
-        $_SESSION['alert_type'] = "success";
-        header("Location: view_doctors.php");
-        exit();
-    } else {
-        $_SESSION['alert_message'] = "Failed to create doctor";
+    // Check if email already exists
+    $stmt = $conn->prepare("SELECT id FROM doctors WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
+        $_SESSION['alert_message'] = "Email is already registered for another doctor.";
         $_SESSION['alert_type'] = "danger";
+    } else {
+        // Process availability (same as edit_doctor.php)
+        $availability = isset($_POST['availability']) ? $_POST['availability'] : [];
+        $availability_times = isset($_POST['availability_times']) ? $_POST['availability_times'] : [];
+        $availability_data = [];
+        foreach ($availability as $day => $checked) {
+            if (isset($availability_times[$day])) {
+                $times = $availability_times[$day];
+                if (!is_array($times)) {
+                    $slots = array_filter(array_map('trim', explode(',', $times)));
+                } else {
+                    $slots = array_filter(array_map('trim', $times));
+                }
+                if (!empty($slots)) {
+                    $availability_data[$day] = $slots;
+                }
+            }
+        }
+        $availability_json = json_encode($availability_data);
+
+        // Insert doctor into the `doctors` table
+        $stmt = $conn->prepare("INSERT INTO doctors (full_name, email, password, phone, nmc_number, specialization, availability) 
+                                VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssss", $full_name, $email, $password, $phone, $nmc_number, $specialization, $availability_json);
+
+        if ($stmt->execute()) {
+            $_SESSION['alert_message'] = "Doctor created successfully";
+            $_SESSION['alert_type'] = "success";
+            header("Location: view_doctors.php");
+            exit();
+        } else {
+            $_SESSION['alert_message'] = "Failed to create doctor";
+            $_SESSION['alert_type'] = "danger";
+        }
     }
 }
 ?>
@@ -81,6 +109,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
         </div>
     </nav>
 
+    <!-- Alert Message -->
+    <?php if (isset($_SESSION['alert_message'])): ?>
+        <div class="container mt-3">
+            <div class="alert alert-<?= $_SESSION['alert_type'] ?? 'info' ?> alert-dismissible fade show" role="alert">
+                <?= htmlspecialchars($_SESSION['alert_message']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        <?php unset($_SESSION['alert_message'], $_SESSION['alert_type']); ?>
+    <?php endif; ?>
+
     <!-- Main Content -->
     <div class="container">
         <div class="row">
@@ -115,10 +154,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                                 <label class="form-label">Specialization</label>
                                 <input type="text" name="specialization" class="form-control" />
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Availability *</label>
-                                <textarea name="availability" class="form-control" placeholder='{"Monday": "9am-5pm", "Tuesday": "10am-4pm"}' required></textarea>
-                            </div>
+                            <!-- Availability Section for Doctor -->
+                            <hr>
+                            <h6 class="card-subtitle mb-2 text-muted">Availability</h6>
+                            <p>Select the days the doctor is available and enter the time.</p>
+                            <?php 
+                            $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            foreach ($daysOfWeek as $day): ?>
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="availability_<?= $day ?>" name="availability[<?= $day ?>]" onclick="toggleTimeInput('<?= $day ?>')">
+                                    <label class="form-check-label" for="availability_<?= $day ?>"><?= $day ?></label>
+                                    <input type="text" class="form-control mt-2" id="time_<?= $day ?>" name="availability_times[<?= $day ?>]" placeholder="Enter time slots, e.g. 9:00 AM, 10:00 AM" disabled>
+                                    <small class="text-muted">Separate multiple time slots with a comma.</small>
+                                </div>
+                            <?php endforeach; ?>
                             <button type="submit" name="create_doctor" class="btn btn-primary">
                                 <i class="bi bi-person-plus me-1"></i>Create Doctor
                             </button>
@@ -138,5 +187,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Enable or Disable time input when checkbox is checked/unchecked
+        function toggleTimeInput(day) {
+            const timeInput = document.getElementById('time_' + day);
+            const checkbox = document.getElementById('availability_' + day);
+            if (checkbox.checked) {
+                timeInput.disabled = false;
+            } else {
+                timeInput.disabled = true;
+            }
+        }
+        // Initialize the availability time input based on initial checkbox state
+        document.addEventListener('DOMContentLoaded', function () {
+            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+            daysOfWeek.forEach(day => {
+                toggleTimeInput(day);
+            });
+        });
+    </script>
 </body>
 </html>

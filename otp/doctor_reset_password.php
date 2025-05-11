@@ -28,12 +28,10 @@ if (isset($_POST['reset_password'])) {
         // Set success flag
         $reset_success = true;
 
-        // Destroy the session after successful password reset
-        session_destroy();
-
-        // Redirect to the home page (index.php)
-        header("Location: ../index.php");
-        exit;
+        // Do not destroy session or redirect here, handle with JS after popup
+        // session_destroy();
+        // header("Location: ../index.php");
+        // exit;
     }
 }
 ?>
@@ -51,12 +49,6 @@ if (isset($_POST['reset_password'])) {
                 <?php echo $error; ?>
             </div>
         <?php endif; ?>
-
-        <?php if (isset($reset_success)): ?>
-            <div class="alert alert-success w-50 mx-auto" role="alert">
-                Password reset successful. You will be redirected shortly.
-            </div>
-        <?php endif; ?>
     </div>
 
     <div class="mx-auto container w-50">
@@ -71,5 +63,24 @@ if (isset($_POST['reset_password'])) {
         </form>
     </div>
 </section>
+
+<!-- Toastr CSS/JS (if not already included in header) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    <?php if (isset($reset_success)): ?>
+        toastr.options = {
+            "positionClass": "toast-bottom-right",
+            "timeOut": 2000,
+            "closeButton": true
+        };
+        toastr.success("Reset password successful!");
+        setTimeout(function() {
+            window.location.href = "../index.php";
+        }, 2000);
+        // Destroy session after redirect
+        <?php session_destroy(); ?>
+    <?php endif; ?>
+</script>
 
 <?php include('../footer.php'); ?>

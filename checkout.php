@@ -472,10 +472,16 @@ $purchase_order_name = 'Shady Shades Order';
             <span><?= htmlspecialchars($_POST['order_note']) ?></span>
           </div>
         <?php endif; ?>
+        <?php if (empty($cart_items)): ?>
+          <div class="alert alert-warning mb-2">
+            Your cart is empty. Please add items to your cart before placing an order.
+          </div>
+        <?php endif; ?>
         <button
           type="button"
           id="placeOrderBtn"
           class="btn btn-success place-order-btn"
+          <?php if (empty($cart_items)) echo 'disabled'; ?>
         >
           Place Order
         </button>
@@ -489,6 +495,12 @@ $purchase_order_name = 'Shady Shades Order';
   const realSubmit = HTMLFormElement.prototype.submit;
 
   function validateAndSubmit() {
+    // Prevent submission if cart is empty
+    <?php if (empty($cart_items)): ?>
+      alert("Your cart is empty. Please add items to your cart before placing an order.");
+      return;
+    <?php endif; ?>
+
     const form = document.getElementById("checkoutForm");
     const phoneField = form.elements.inputPhone;
     const phone = phoneField.value.trim();

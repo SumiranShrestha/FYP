@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
             <div class="card-body">
                 <h5 class="mb-4">Customize your prescription details for the selected frame</h5>
 
-                <form action="" method="POST">
+                <form id="prescriptionForm" action="" method="POST">
                     <input type="hidden" name="product_id" value="<?= htmlspecialchars($product_id) ?>">
 
                     <!-- Option to select a saved prescription -->
@@ -148,8 +148,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
         </div>
     </div>
 
+    <!-- Toast for not logged in -->
+    <div class="toast align-items-center border-0 bg-danger text-white" id="orderToast" role="alert" aria-live="assertive" aria-atomic="true" style="display:none; position: fixed; bottom: 30px; right: 30px; z-index: 9999; min-width: 280px;">
+      <div class="d-flex">
+        <div class="toast-body">
+          You must login to order.
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Output prescriptions as JS object
+    <?php
+    if (!empty($prescriptions)) {
+        $prescriptionsById = [];
+        foreach ($prescriptions as $p) {
+            $prescriptionsById[$p['id']] = $p;
+        }
+        echo "const prescriptionsData = " . json_encode($prescriptionsById) . ";";
+    } else {
+        echo "const prescriptionsData = {};";
+    }
+    ?>
+    document.addEventListener("DOMContentLoaded", function() {
+        var form = document.getElementById('prescriptionForm');
+        // Populate fields when a saved prescription is selected
+        var prescriptionSelect = document.getElementById('prescription_id');
+        if (prescriptionSelect) {
+            prescriptionSelect.addEventListener('change', function() {
+                var selectedId = this.value;
+                if (prescriptionsData[selectedId]) {
+                    document.getElementById('right_eye_sphere').value = prescriptionsData[selectedId]['right_eye_sphere'] || '';
+                    document.getElementById('right_eye_cylinder').value = prescriptionsData[selectedId]['right_eye_cylinder'] || '';
+                    document.getElementById('right_eye_axis').value = prescriptionsData[selectedId]['right_eye_axis'] || '';
+                    document.getElementById('left_eye_sphere').value = prescriptionsData[selectedId]['left_eye_sphere'] || '';
+                    document.getElementById('left_eye_cylinder').value = prescriptionsData[selectedId]['left_eye_cylinder'] || '';
+                    document.getElementById('left_eye_axis').value = prescriptionsData[selectedId]['left_eye_axis'] || '';
+                } else {
+                    document.getElementById('right_eye_sphere').value = '';
+                    document.getElementById('right_eye_cylinder').value = '';
+                    document.getElementById('right_eye_axis').value = '';
+                    document.getElementById('left_eye_sphere').value = '';
+                    document.getElementById('left_eye_cylinder').value = '';
+                    document.getElementById('left_eye_axis').value = '';
+                }
+            });
+        }
+        form.addEventListener('submit', function(e) {
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                e.preventDefault();
+                var toastEl = document.getElementById('orderToast');
+                toastEl.style.display = 'block';
+                var toast = new bootstrap.Toast(toastEl, { delay: 1800 });
+                toast.show();
+                setTimeout(function() {
+                    toast.hide();
+                }, 1800);
+            <?php endif; ?>
+        });
+    });
+    </script>
 </body>
 </html>
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2025 at 10:22 AM
+-- Generation Time: May 11, 2025 at 06:17 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -38,7 +38,8 @@ CREATE TABLE `admins` (
 --
 
 INSERT INTO `admins` (`id`, `username`, `password`) VALUES
-(2, 'admin', '$2y$10$LyYvX1VEmMYniSL.blwrlO/GbQ4T.r0qHX26WGnLQ5V3YDgwRjggq');
+(2, 'admin', '$2y$10$LyYvX1VEmMYniSL.blwrlO/GbQ4T.r0qHX26WGnLQ5V3YDgwRjggq'),
+(3, 'admin1', '$2y$10$JoidV9GfkT9PgC.1b1VIqe3NW2KuiQ/gwL2k5snSuE3PgSAjCyPPK');
 
 -- --------------------------------------------------------
 
@@ -55,14 +56,6 @@ CREATE TABLE `appointments` (
   `prescription` text DEFAULT NULL,
   `user_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `appointments`
---
-
-INSERT INTO `appointments` (`id`, `user_id`, `doctor_id`, `appointment_date`, `status`, `prescription`, `user_name`) VALUES
-(89, 10, 6, '2025-05-04 14:00:00', 'cancelled', NULL, NULL),
-(90, 10, 6, '2025-05-11 09:00:00', 'pending', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -177,7 +170,7 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`id`, `full_name`, `email`, `password`, `phone`, `nmc_number`, `specialization`, `availability`, `created_at`, `address`, `city`) VALUES
-(6, 'Bibek Shrestha', 'bibek@gmail.com', '$2y$10$eKrhKi7tz1U6zeUY/KqbGuM3If1IozzOIprKUCkaMUTTkc1tuf.3q', '9843641720', 'NMC123', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\",\"2:00 PM\"],\"Tuesday\":[\"1:00 PM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
+(6, 'Bibek Shrestha', 'mellowplays22@gmail.com', '$2y$10$dBNvDMvw9qxhj8vD5Gtjoem/TFWc/0vXGKOSJLMfLoU554FTPD7i6', '9843641720', 'NMC123', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\",\"2:00 PM\"],\"Tuesday\":[\"1:00 PM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
 (13, 'Sumi Shrestha', 'sumi@gmail.com', '$2y$10$HD6a8prw7zbWNjDOxaXLlOONTUmb32XtRG5MLlkFcQjVPitao15Kq', '9826455863', 'testabc', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\"],\"Tuesday\":[\"9:00 AM\",\"2:00 PM\"]}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu');
 
 -- --------------------------------------------------------
@@ -231,13 +224,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `full_name`, `email`, `phone`, `address`, `city`, `payment_method`, `total_price`, `status`, `created_at`, `order_status`, `prescription_id`, `order_note`) VALUES
-(104, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, 'pending', '2025-04-26 10:25:03', 'Pending', NULL, NULL),
-(106, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 22100.00, 'pending', '2025-04-26 10:28:13', 'Pending', NULL, NULL),
-(107, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 300.00, 'pending', '2025-04-26 10:36:48', 'Pending', NULL, 'I was searching for it.'),
-(108, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 300.00, 'pending', '2025-04-26 10:48:28', 'Pending', NULL, NULL),
-(109, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-26 11:05:55', 'Pending', NULL, 'nice'),
-(110, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 2900.00, 'pending', '2025-04-27 04:59:16', 'Pending', NULL, 'I was searching for it.'),
-(111, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 100.00, 'pending', '2025-05-04 08:36:32', 'Pending', NULL, '');
+(140, 10, '', 'sumiranshrestha22@gmail.com', '', '', '', '', 0.00, 'pending', '2025-05-11 04:06:34', 'Pending', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -250,16 +237,9 @@ CREATE TABLE `order_items` (
   `order_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL,
-  `price` decimal(10,2) NOT NULL
+  `price` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT 'cod'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `order_items`
---
-
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) VALUES
-(38, 104, 4, 1, 1500.00),
-(39, 106, 3, 1, 22000.00);
 
 -- --------------------------------------------------------
 
@@ -287,6 +267,13 @@ CREATE TABLE `prescription_frames` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `product_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `prescription_frames`
+--
+
+INSERT INTO `prescription_frames` (`id`, `user_id`, `order_id`, `cart_id`, `right_eye_sphere`, `right_eye_cylinder`, `right_eye_axis`, `right_eye_pd`, `left_eye_sphere`, `left_eye_cylinder`, `left_eye_axis`, `left_eye_pd`, `frame_model`, `lens_type`, `coating_type`, `created_at`, `updated_at`, `product_id`) VALUES
+(7, 10, NULL, NULL, 1.00, 1.00, 1, NULL, 1.00, 1.00, 1, NULL, NULL, 'single_vision', 'anti_reflective', '2025-05-11 04:05:03', '2025-05-11 04:05:03', 35);
 
 -- --------------------------------------------------------
 
@@ -335,24 +322,26 @@ CREATE TABLE `products` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `category_id` int(11) DEFAULT NULL,
   `prescription_required` tinyint(1) DEFAULT 0,
-  `frame_types_available` enum('normal','prescription','both') DEFAULT 'both'
+  `frame_types_available` enum('normal','prescription','both') DEFAULT 'both',
+  `facial_structure` enum('round','oval','square','heart','diamond','triangle','all') DEFAULT 'all'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `products`
 --
 
-INSERT INTO `products` (`id`, `name`, `description`, `price`, `discount_price`, `stock`, `brand_id`, `images`, `created_at`, `category_id`, `prescription_required`, `frame_types_available`) VALUES
-(1, 'Ray-Ban RB2210', 'Ray-Ban RB2210\r\nSize Details: 53🔲20 145\r\n\r\nLens Color: Green\r\n\r\nElevate your style with the Ray-Ban RB2210, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from Acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nWhether you\'re on the go or lounging outdoors, the Ray-Ban RB2210 is the ultimate accessory for both style and performance. Get yours today!', 5800.00, 5200.00, 15, 1, '[\"..\\/uploads\\/67f65bd4d8f0e_product_image-img_1051-0498 (1).webp\",\"..\\/uploads\\/67f65be3df3fd_image (4).webp\",\"..\\/uploads\\/67f65bf3266ee_product_image-img_1053-2559 (1).webp\",\"..\\/uploads\\/67f65c02600b8_product_image-img_1054-8632 (1).webp\"]', '2025-03-07 09:58:41', 2, 0, NULL),
-(2, 'Oakley Gascan Sunglasses for Men\n', 'Description\n\nTimeless Style Meets Ultimate Protection\n\nExperience the perfect combination of style, comfort, and performance with our expertly crafted sunglasses. Designed for every occasion, they offer unparalleled protection and timeless appeal.\n\nKey Highlights:\n100% UV Protection: Safeguard your eyes from harmful UVA and UVB rays.\n\nDurable Frames: Built with high quality acetate, ensuring a lightweight yet sturdy fit.\n\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\n\nVersatile Design: Flattering for all face shapes and ideal for both casual and formal wear.\n\nWhether you\'re hitting the beach, driving through scenic routes, or simply enjoying a sunny day, these sunglasses are the perfect accessory to elevate your look and protect your eyes.', 3500.00, 2800.00, 12, 2, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0911-5820.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0912-7064.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0913-5505.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0914-2828.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(3, 'Gucci Square Unisex Leopard Print Sunglasses', 'Description\n\nGucci [GG1084S 008G] Sunglasses\n\nElevate your style with the Gucci [GG1084S 008G], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: 53 mm\n\nBridge Width: 20 mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Gucci [GG1084S 008G] is the ultimate accessory for both style and performance. Get yours today!', 25000.00, 22000.00, 10, 3, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_9831-0018.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_9832-7042.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_9830-5644.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_9828-5364.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_9829-9905.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(4, 'Versace Oval Women\'s Sunglasses', 'Description\n\nVersace Sunglasses\n\nElevate your style with the Versace Sunglass, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium polycarbonate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with non-polarized lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nWhether you\'re on the go or lounging outdoors, the Versace Sunglass is the ultimate accessory for both style and performance. Get yours today!', 1500.00, 0.00, 8, 4, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0749-7065.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0750-8111.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0751-4585.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0752-1313.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(5, 'Prada Symbole sunglasses\n', 'Prada Symbole sunglasses\n\nElevate your style with the Prada Symbole Sunglasses, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\nWhether you\'re on the go or lounging outdoors, the Prada Symbole sunglasses is the ultimate accessory for both style and performance. Get yours today!', 7200.00, 6500.00, 10, 5, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0721-1809.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0722-0291.webp\",\n\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0723-5250.webp\",\n\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0724-6530.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(6, 'Emporio Armani Unisex Sunglass\n', 'Description\n\nEmporio Armani [Model] Sunglasses\n\nElevate your style with the Emporio Armani [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Emporio Armani [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 5, 6, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0443-1219.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0445-3477.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0444-6658.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(7, 'Tom Ford Square Women\'s Sunglass\n', 'Description\n\nTom Ford [Model] Sunglasses\n\nElevate your style with the Tom Ford [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Tom Ford [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 7, 7, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0438-5827.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0437-8356.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0439-8971.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(8, 'Burberry Square Women\'s Sunglass\n', 'Description\n\nBurberry [Model] Sunglasses\n\nElevate your style with the Burberry [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Burberry [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 9, 8, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0434-7678.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0436-8460.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0435-8310.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL),
-(14, 'Magic TR Transparent, Blue-cut Frame (Small Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cover', 1299.00, 950.00, 15, 1, '[\"..\\/uploads\\/67f65a9e486d7_product_image-img_0185-0987 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL),
-(20, 'Magic TR Transparent, Blue-cut Frame (Big Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cove', 1299.00, 950.00, 6, 4, '[\"..\\/uploads\\/67f6586be8d5f_product_image-img_0169-9658 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL);
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `discount_price`, `stock`, `brand_id`, `images`, `created_at`, `category_id`, `prescription_required`, `frame_types_available`, `facial_structure`) VALUES
+(1, 'Ray-Ban RB2210', 'Ray-Ban RB2210\r\nSize Details: 53🔲20 145\r\n\r\nLens Color: Green\r\n\r\nElevate your style with the Ray-Ban RB2210, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from Acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nWhether you\'re on the go or lounging outdoors, the Ray-Ban RB2210 is the ultimate accessory for both style and performance. Get yours today!', 5800.00, 5200.00, 15, 1, '[\"..\\/uploads\\/67f65bd4d8f0e_product_image-img_1051-0498 (1).webp\",\"..\\/uploads\\/67f65be3df3fd_image (4).webp\",\"..\\/uploads\\/67f65bf3266ee_product_image-img_1053-2559 (1).webp\",\"..\\/uploads\\/67f65c02600b8_product_image-img_1054-8632 (1).webp\"]', '2025-03-07 09:58:41', 2, 0, NULL, 'all'),
+(2, 'Oakley Gascan Sunglasses for Men', 'Timeless Style Meets Ultimate Protection\r\n\r\nExperience the perfect combination of style, comfort, and performance with our expertly crafted sunglasses. Designed for every occasion, they offer unparalleled protection and timeless appeal.\r\n\r\nKey Highlights:\r\n100% UV Protection: Safeguard your eyes from harmful UVA and UVB rays.\r\n\r\nDurable Frames: Built with high quality acetate, ensuring a lightweight yet sturdy fit.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nVersatile Design: Flattering for all face shapes and ideal for both casual and formal wear.\r\n\r\nWhether you\'re hitting the beach, driving through scenic routes, or simply enjoying a sunny day, these sunglasses are the perfect accessory to elevate your look and protect your eyes.', 3500.00, 2800.00, 12, 2, '[\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0911-5820.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0912-7064.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0913-5505.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0914-2828.webp\"]', '2025-03-07 09:58:41', 1, 0, NULL, 'all'),
+(3, 'Gucci Square Unisex Leopard Print Sunglasses', 'Description\r\n\r\nGucci [GG1084S 008G] Sunglasses\r\n\r\nElevate your style with the Gucci [GG1084S 008G], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nSize Details:\r\nLens Width: 53 mm\r\n\r\nBridge Width: 20 mm\r\n\r\nTemple Length: 145 mm\r\n\r\nWhether you\'re on the go or lounging outdoors, the Gucci [GG1084S 008G] is the ultimate accessory for both style and performance. Get yours today!', 5000.00, 2200.00, 10, 3, '[\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9831-0018.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9832-7042.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9830-5644.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9828-5364.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9829-9905.webp\"]', '2025-03-07 09:58:41', 1, 0, NULL, 'all'),
+(4, 'Versace Oval Women\'s Sunglasses', 'Description\n\nVersace Sunglasses\n\nElevate your style with the Versace Sunglass, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium polycarbonate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with non-polarized lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nWhether you\'re on the go or lounging outdoors, the Versace Sunglass is the ultimate accessory for both style and performance. Get yours today!', 1500.00, 0.00, 8, 4, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0749-7065.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0750-8111.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0751-4585.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0752-1313.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
+(5, 'Prada Symbole sunglasses\n', 'Prada Symbole sunglasses\n\nElevate your style with the Prada Symbole Sunglasses, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\nWhether you\'re on the go or lounging outdoors, the Prada Symbole sunglasses is the ultimate accessory for both style and performance. Get yours today!', 7200.00, 6500.00, 10, 5, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0721-1809.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0722-0291.webp\",\n\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0723-5250.webp\",\n\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0724-6530.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
+(6, 'Emporio Armani Unisex Sunglass\n', 'Description\n\nEmporio Armani [Model] Sunglasses\n\nElevate your style with the Emporio Armani [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Emporio Armani [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 5, 6, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0443-1219.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0445-3477.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0444-6658.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
+(7, 'Tom Ford Square Women\'s Sunglass\n', 'Description\n\nTom Ford [Model] Sunglasses\n\nElevate your style with the Tom Ford [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Tom Ford [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 7, 7, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0438-5827.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0437-8356.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0439-8971.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
+(8, 'Burberry Square Women\'s Sunglass\n', 'Description\n\nBurberry [Model] Sunglasses\n\nElevate your style with the Burberry [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Burberry [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 9, 8, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0434-7678.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0436-8460.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0435-8310.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
+(14, 'Magic TR Transparent, Blue-cut Frame (Small Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cover', 1299.00, 950.00, 1, 1, '[\"..\\/uploads\\/67f65a9e486d7_product_image-img_0185-0987 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL, 'all'),
+(20, 'Magic TR Transparent, Blue-cut Frame (Big Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cove', 1299.00, 950.00, 1, 4, '[\"..\\/uploads\\/67f6586be8d5f_product_image-img_0169-9658 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL, 'oval'),
+(35, 'fdghdcfgh', 'dfghdfghdfghdfghdfghdfgh', 2000.00, 1000.00, 5, 1, '[\"..\\/uploads\\/68200f7337614_product_image-img_1054-8632 (1).webp\",\"..\\/uploads\\/68200f7337c69_product_image-img_1053-2559 (1).webp\",\"..\\/uploads\\/68200f73380eb_image (4).webp\"]', '2025-05-11 02:45:10', 1, 1, 'both', 'round');
 
 -- --------------------------------------------------------
 
@@ -377,7 +366,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `user_name`, `user_email`, `user_password`, `registration_date`, `phone`, `address`, `city`, `active`) VALUES
-(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$3VAevDXEDOpfq7MTjA0rQ.wsutF.XWSrOp7Cb9FxCFRJRzbKhiDLq', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
+(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$MVZDBzEsFlt2nGS85ctKHeKe2xG6/YdOXsOZt7Abo90JeHheXd5sO', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
 (16, 'Mellow Plays', '', '$2y$10$eaJl391wb1qU2i.cKvNVUeKZYkb7TtxDiJC1Y8rV0PzJBsXk4SwVW', '2025-04-20 10:14:42', '9826455863', 'Dhapasi', 'Kathmandu', 1);
 
 --
@@ -498,13 +487,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `admins`
 --
 ALTER TABLE `admins`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
 
 --
 -- AUTO_INCREMENT for table `banners`
@@ -522,7 +511,7 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=218;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -546,19 +535,19 @@ ALTER TABLE `faqs`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=141;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `prescription_frames`
 --
 ALTER TABLE `prescription_frames`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `prescription_orders`
@@ -570,7 +559,7 @@ ALTER TABLE `prescription_orders`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `users`

@@ -7,6 +7,17 @@ $search_query = $_GET['search'] ?? '';
 $min_price = $_GET['min_price'] ?? 0;
 $max_price = $_GET['max_price'] ?? 10000; // Set an arbitrary high price limit for filtering
 
+// Handle prescription deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_prescription_id'])) {
+    if (isset($_SESSION['user_id'])) {
+        $delete_id = intval($_POST['delete_prescription_id']);
+        $user_id = $_SESSION['user_id'];
+        $stmt = $conn->prepare("DELETE FROM prescription_frames WHERE id = ? AND user_id = ?");
+        $stmt->bind_param("ii", $delete_id, $user_id);
+        $stmt->execute();
+    }
+}
+
 // Get prescription frame products with filtering based on search and price
 $query = "SELECT p.*, b.brand_name 
           FROM products p 
@@ -65,7 +76,23 @@ if (isset($_SESSION['user_id'])) {
                     <?php foreach ($prescriptions as $prescription): ?>
                         <div class="col">
                             <div class="card h-100 shadow-sm">
-                                <div class="card-body">
+                                <div class="card-body position-relative">
+                                    <div class="position-absolute top-0 end-0 mt-2 me-2 z-2">
+                                        <div class="btn-group" role="group">
+                                            <a href="edit_prescription.php?prescription_id=<?= $prescription['id'] ?>"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Prescription">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this prescription?');" class="d-inline m-0 p-0">
+                                                <input type="hidden" name="delete_prescription_id" value="<?= $prescription['id'] ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Prescription">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
                                     <h6 class="card-title">Prescription from <?= date('M d, Y', strtotime($prescription['created_at'])) ?></h6>
                                     <div class="row small">
                                         <div class="col-6">
@@ -85,9 +112,9 @@ if (isset($_SESSION['user_id'])) {
                                             </p>
                                         </div>
                                     </div>
-                                    <div class="d-grid mt-2">
+                                    <div class="d-grid mt-2 gap-2">
                                         <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>"
-                                            class="btn btn-sm btn-outline-primary">
+                                            class="btn btn-sm btn-outline-primary mb-1">
                                             Use This Prescription
                                         </a>
                                     </div>

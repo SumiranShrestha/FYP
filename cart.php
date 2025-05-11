@@ -45,7 +45,7 @@ $final_total = $total_price + $shipping_cost;
 
 <div class="container my-5">
     <h2>Your Cart</h2>
-    
+
     <!-- Toast Container -->
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
         <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
@@ -91,12 +91,15 @@ $final_total = $total_price + $shipping_cost;
                 <?php } ?>
             </tbody>
         </table>
-        
+
         <h4>Total: <span id="totalPrice">Rs <?php echo number_format($final_total); ?></span> /-</h4>
         <button class="btn btn-danger" id="clearCart">Clear Cart</button>
         <a href="checkout.php" class="btn btn-success">Proceed to Checkout</a>
     <?php } else { ?>
-        <p>Your cart is empty.</p>
+        <div class="text-center">
+            <img src="images/cart.png" alt="Empty Cart" class="img-fluid" style="max-width: 250px;">
+            <div class="mt-3 text-danger" style="font-size:1rem;">Your cart is empty.</div>
+        </div>
     <?php } ?>
 </div>
 
@@ -104,99 +107,105 @@ $final_total = $total_price + $shipping_cost;
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    function showToast(type, message) {
-        let toastEl = document.getElementById(type);
-        toastEl.querySelector(".toast-body").textContent = message;
-        let toast = new bootstrap.Toast(toastEl);
-        toast.show();
-    }
+    document.addEventListener("DOMContentLoaded", function() {
+        function showToast(type, message) {
+            let toastEl = document.getElementById(type);
+            toastEl.querySelector(".toast-body").textContent = message;
+            let toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
 
-    function updateTotalPrice() {
-        let total = 0;
-        document.querySelectorAll("tr[id^='row-']").forEach(row => {
-            let id = row.id.split("-")[1];
-            let price = parseFloat(document.getElementById(`price-${id}`).textContent.replace(",", ""));
-            let quantity = parseInt(document.getElementById(`quantity-${id}`).textContent);
-            total += price * quantity;
+        function updateTotalPrice() {
+            let total = 0;
+            document.querySelectorAll("tr[id^='row-']").forEach(row => {
+                let id = row.id.split("-")[1];
+                let price = parseFloat(document.getElementById(`price-${id}`).textContent.replace(",", ""));
+                let quantity = parseInt(document.getElementById(`quantity-${id}`).textContent);
+                total += price * quantity;
+            });
+            document.getElementById("totalPrice").textContent = `Rs ${total.toLocaleString()}`;
+        }
+
+        document.querySelectorAll(".update-cart").forEach(button => {
+            button.addEventListener("click", function() {
+                let productId = this.getAttribute("data-id");
+                let action = this.getAttribute("data-action");
+                let stock = parseInt(this.getAttribute("data-stock"));
+                let currentQuantity = parseInt(document.getElementById(`quantity-${productId}`).textContent);
+
+                if (action === "increase" && currentQuantity >= stock) {
+                    showToast("cartErrorToast", "Not enough stock available!");
+                    return;
+                }
+
+                fetch("server/update_cart.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `product_id=${productId}&action=${action}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            document.getElementById(`quantity-${productId}`).textContent = data.quantity;
+                            updateTotalPrice();
+                            showToast("cartToast", "Cart updated successfully!");
+                            if (data.quantity === 0) {
+                                document.getElementById(`row-${productId}`).remove();
+                            }
+                        } else {
+                            showToast("cartErrorToast", data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        showToast("cartErrorToast", "An error occurred!");
+                    });
+            });
         });
-        document.getElementById("totalPrice").textContent = `Rs ${total.toLocaleString()}`;
-    }
 
-    document.querySelectorAll(".update-cart").forEach(button => {
-        button.addEventListener("click", function() {
-            let productId = this.getAttribute("data-id");
-            let action = this.getAttribute("data-action");
-            let stock = parseInt(this.getAttribute("data-stock"));
-            let currentQuantity = parseInt(document.getElementById(`quantity-${productId}`).textContent);
+        document.querySelectorAll(".remove-item").forEach(button => {
+            button.addEventListener("click", function() {
+                let productId = this.getAttribute("data-id");
 
-            if (action === "increase" && currentQuantity >= stock) {
-                showToast("cartErrorToast", "Not enough stock available!");
-                return;
-            }
+                fetch("server/remove_from_cart.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `product_id=${productId}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            document.getElementById(`row-${productId}`).remove();
+                            updateTotalPrice();
+                            showToast("cartToast", "Item removed from cart!");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        showToast("cartErrorToast", "An error occurred!");
+                    });
+            });
+        });
 
-            fetch("server/update_cart.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `product_id=${productId}&action=${action}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    document.getElementById(`quantity-${productId}`).textContent = data.quantity;
-                    updateTotalPrice();
-                    showToast("cartToast", "Cart updated successfully!");
-                    if (data.quantity === 0) {
-                        document.getElementById(`row-${productId}`).remove();
+        document.getElementById("clearCart").addEventListener("click", function() {
+            fetch("server/clear_cart.php", {
+                    method: "POST"
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        location.reload();
                     }
-                } else {
-                    showToast("cartErrorToast", data.message);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showToast("cartErrorToast", "An error occurred!");
-            });
+                });
         });
     });
-
-    document.querySelectorAll(".remove-item").forEach(button => {
-        button.addEventListener("click", function() {
-            let productId = this.getAttribute("data-id");
-
-            fetch("server/remove_from_cart.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `product_id=${productId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === "success") {
-                    document.getElementById(`row-${productId}`).remove();
-                    updateTotalPrice();
-                    showToast("cartToast", "Item removed from cart!");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showToast("cartErrorToast", "An error occurred!");
-            });
-        });
-    });
-
-    document.getElementById("clearCart").addEventListener("click", function() {
-        fetch("server/clear_cart.php", { method: "POST" })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                location.reload();
-            }
-        });
-    });
-});
 </script>
 
 <?php include('footer.php'); ?>
 </body>
+
 </html>
-    
