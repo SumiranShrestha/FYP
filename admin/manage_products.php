@@ -143,6 +143,12 @@ $result = $conn->query("
             max-height: 600px;
             overflow-y: auto;
         }
+
+        .required-asterisk {
+            color: red;
+            margin-left: 2px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -201,13 +207,13 @@ $result = $conn->query("
                     <div class="card-body">
                         <form method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Product Name</label>
+                                <label for="name" class="form-label">Product Name<span class="required-asterisk">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="brand" class="form-label">Brand</label>
-                                <select class="form-select" id="brand" name="brand">
+                                <label for="brand" class="form-label">Brand<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="brand" name="brand" required>
                                     <option value="">Select brand</option>
                                     <?php while ($brand = $brands_result->fetch_assoc()): ?>
                                         <option value="<?= $brand['id']; ?>">
@@ -218,8 +224,8 @@ $result = $conn->query("
                             </div>
 
                             <div class="mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category">
+                                <label for="category" class="form-label">Category<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="category" name="category" required>
                                     <option value="">Select category</option>
                                     <?php if ($categories_result->num_rows > 0): ?>
                                         <?php while ($category = $categories_result->fetch_assoc()): ?>
@@ -232,7 +238,7 @@ $result = $conn->query("
                             </div>
 
                             <div class="mb-3">
-                                <label for="price" class="form-label">Price (रू)</label>
+                                <label for="price" class="form-label">Price (रू)<span class="required-asterisk">*</span></label>
                                 <input type="number" step="0.01" class="form-control" id="price" name="price" required>
                             </div>
 
@@ -243,17 +249,12 @@ $result = $conn->query("
 
                             <div class="mb-3">
                                 <label for="stock" class="form-label">Stock Quantity</label>
-                                <input type="number" class="form-control" id="stock" name="stock" value="10">
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="prescription_required" name="prescription_required">
-                                <label class="form-check-label" for="prescription_required">Prescription Required</label>
+                                <input type="number" class="form-control" id="stock" name="stock" value="10" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                                <label for="description" class="form-label">Description<span class="required-asterisk">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                             </div>
 
                             <div class="mb-3">
@@ -271,8 +272,8 @@ $result = $conn->query("
                             </div>
 
                             <div class="mb-3">
-                                <label for="images" class="form-label">Product Images</label>
-                                <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
+                                <label for="images" class="form-label">Product Images<span class="required-asterisk">*</span></label>
+                                <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*" required>
                             </div>
 
                             <button type="submit" name="add_product" class="btn btn-success w-100">

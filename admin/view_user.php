@@ -224,19 +224,19 @@ if ($conn->query("SHOW TABLES LIKE 'orders'")->num_rows > 0) {
                                                 <td>
                                                     <?php 
                                                     switch($order['status']) {
-                                                        case 'pending':
+                                                        case 'Pending':
                                                             echo '<span class="badge bg-warning text-dark">Pending</span>';
                                                             break;
-                                                        case 'processing':
+                                                        case 'Processing':
                                                             echo '<span class="badge bg-info text-dark">Processing</span>';
                                                             break;
-                                                        case 'shipped':
+                                                        case 'Shipped':
                                                             echo '<span class="badge bg-primary">Shipped</span>';
                                                             break;
-                                                        case 'delivered':
+                                                        case 'Delivered':
                                                             echo '<span class="badge bg-success">Delivered</span>';
                                                             break;
-                                                        case 'cancelled':
+                                                        case 'Cancelled':
                                                             echo '<span class="badge bg-danger">Cancelled</span>';
                                                             break;
                                                         default:

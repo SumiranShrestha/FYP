@@ -21,11 +21,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validate inputs
     if (empty($user_name)) {
         $errors[] = "Name is required.";
+    } elseif (!preg_match('/^[a-zA-Z\s]+$/', $user_name)) {
+        $errors[] = "Name must contain only letters and spaces.";
     }
     if (empty($user_email)) {
         $errors[] = "Email is required.";
-    } elseif (!filter_var($user_email, FILTER_VALIDATE_EMAIL)) {
-        $errors[] = "Invalid email address.";
+    } elseif (!filter_var($user_email, FILTER_VALIDATE_EMAIL) || !preg_match('/@.+\.com$/', $user_email)) {
+        $errors[] = "Email must be valid and contain @...com";
     }
     if (empty($user_password)) {
         $errors[] = "Password is required.";

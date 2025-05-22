@@ -211,6 +211,15 @@ $result = $conn->query("
       ) ? '' : 'none';
     });
   });
+
+  // Auto-dismiss alerts after 3 seconds
+  setTimeout(function() {
+    var alert = document.querySelector('.alert-dismissible');
+    if (alert) {
+      var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
+    }
+  }, 3000);
   </script>
 </body>
 </html>

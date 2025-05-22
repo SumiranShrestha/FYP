@@ -8,18 +8,6 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Prevent double order submission
-if (isset($_SESSION['order_placed']) && $_SESSION['order_placed'] === true) {
-    // Redirect to confirmation if order already placed in this session
-    if (isset($_SESSION['last_order_id'])) {
-        header("Location: order-confirmation.php?order_id=" . $_SESSION['last_order_id']);
-        exit();
-    } else {
-        echo json_encode(["status" => "error", "message" => "Order already placed."]);
-        exit();
-    }
-}
-
 $user_id = $_SESSION['user_id'];
 $full_name = $_POST['inputName'] ?? '';
 $phone = $_POST['inputPhone'] ?? '';
@@ -55,9 +43,8 @@ $stmt->bind_param("issssssds", $user_id, $full_name, $email, $phone, $address, $
 if ($stmt->execute()) {
     $order_id = $stmt->insert_id;
 
-    // Set session flag to prevent double submission
-    $_SESSION['order_placed'] = true;
-    $_SESSION['last_order_id'] = $order_id;
+    // Remove session flag so user can order again
+    unset($_SESSION['order_placed'], $_SESSION['last_order_id']);
 
     // Redirect to the order confirmation page with the order ID
     header("Location: order-confirmation.php?order_id=" . $order_id);

@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
     // If using a saved prescription
     if ($prescription_id) {
         // Redirect to the prescription order page
-        header("Location: prescription_order.php?prescription_id=$prescription_id&product_id=$product_id");
+        header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
         exit();
     } 
 

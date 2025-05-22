@@ -456,6 +456,25 @@ if (isset($_SESSION["user_id"])) {
         //     $("#logoutConfirmModal").modal("hide");
         // });
 
+        // Real-time user active status check
+        <?php if (isset($_SESSION["user_id"])): ?>
+        setInterval(function() {
+            $.ajax({
+                url: "server/check_user_active.php",
+                method: "POST",
+                data: { user_id: <?= json_encode($_SESSION["user_id"]) ?> },
+                dataType: "json",
+                success: function(response) {
+                    if (response.status === "inactive") {
+                        toastr.error("Your Account is Inactive");
+                        setTimeout(function() {
+                            window.location.href = "server/logout.php";
+                        }, 3000);
+                    }
+                }
+            });
+        }, 5000); // check every 5 seconds
+        <?php endif; ?>
     });
 </script>
 </body>

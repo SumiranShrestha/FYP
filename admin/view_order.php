@@ -96,8 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="bi bi-bag me-2"></i>Order Details</h2>
-            <a href="manage_users.php" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Back to Users
+            <a href="manage_orders.php" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to Orders
             </a>
         </div>
 
@@ -114,19 +114,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <p><strong>Status:</strong> 
                             <?php
                             switch($order['status']) {
-                                case 'pending':
+                                case 'Pending':
                                     echo '<span class="badge bg-warning text-dark">Pending</span>';
                                     break;
-                                case 'processing':
+                                case 'Processing':
                                     echo '<span class="badge bg-info text-dark">Processing</span>';
                                     break;
-                                case 'shipped':
+                                case 'Shipped':
                                     echo '<span class="badge bg-primary">Shipped</span>';
                                     break;
-                                case 'delivered':
+                                case 'Delivered':
                                     echo '<span class="badge bg-success">Delivered</span>';
                                     break;
-                                case 'cancelled':
+                                case 'Cancelled':
                                     echo '<span class="badge bg-danger">Cancelled</span>';
                                     break;
                                 default:
@@ -151,11 +151,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <div class="col-md-6">
                             <label for="status" class="form-label"><strong>Update Status:</strong></label>
                             <select name="status" id="status" class="form-select">
-                                <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : ''; ?>>Processing</option>
-                                <option value="shipped" <?= $order['status'] === 'shipped' ? 'selected' : ''; ?>>Shipped</option>
-                                <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : ''; ?>>Delivered</option>
-                                <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                <option value="Pending" <?= $order['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
+                                <option value="Processing" <?= $order['status'] === 'Processing' ? 'selected' : ''; ?>>Processing</option>
+                                <option value="Shipped" <?= $order['status'] === 'Shipped' ? 'selected' : ''; ?>>Shipped</option>
+                                <option value="Delivered" <?= $order['status'] === 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
+                                <option value="Cancelled" <?= $order['status'] === 'Cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                             </select>
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
@@ -179,4 +179,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
+</html>

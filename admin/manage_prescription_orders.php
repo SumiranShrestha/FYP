@@ -1,80 +1,100 @@
 <?php
 session_start();
+include("server/connection.php");
+
 if (!isset($_SESSION["admin_logged_in"])) {
     header("Location: admin_login.php");
     exit();
 }
-require_once("../server/connection.php");
 
-// Fetch prescription orders with user and product info
-$sql = "SELECT po.*, u.user_name, p.name AS product_name
-        FROM prescription_orders po
-        LEFT JOIN users u ON po.user_id = u.id
-        LEFT JOIN products p ON po.product_id = p.id
-        ORDER BY po.created_at DESC";
-$result = $conn->query($sql);
+// Fetch all prescription orders with user, product and prescription info
+$query = "
+SELECT po.*, u.user_name, u.user_email, p.name AS product_name 
+FROM prescription_orders po
+JOIN users u ON po.user_id = u.id
+JOIN products p ON po.product_id = p.id
+ORDER BY po.created_at DESC
+";
+
+$result = $conn->query($query);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Manage Prescription Orders</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
-    <div class="container my-5">
-        <h2 class="mb-4">Prescription Orders</h2>
-        <a href="admin_dashboard.php" class="btn btn-secondary mb-3">&larr; Back to Dashboard</a>
+    <div class="container mt-5">
+        <h2 class="mb-4"><i class="bi bi-file-medical me-2"></i>Manage Prescription Orders</h2>
+
+        <?php if (isset($_SESSION['alert_message'])): ?>
+            <div class="alert alert-<?= $_SESSION['alert_type'] ?> alert-dismissible fade show" role="alert">
+                <?= $_SESSION['alert_message'] ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['alert_message'], $_SESSION['alert_type']); ?>
+        <?php endif; ?>
+
         <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-primary">
+            <table class="table table-striped table-hover">
+                <thead class="table-light">
                     <tr>
                         <th>ID</th>
                         <th>User</th>
+                        <th>Email</th>
                         <th>Product</th>
-                        <th>Order Type</th>
-                        <th>Right Eye (SPH/CYL/Axis/PD)</th>
-                        <th>Left Eye (SPH/CYL/Axis/PD)</th>
+                        <th>Status</th>
                         <th>Lens Type</th>
                         <th>Coating</th>
-                        <th>Frame Color</th>
-                        <th>Frame Size</th>
-                        <th>Status</th>
-                        <th>Created At</th>
+                        <th>Created</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php if ($result && $result->num_rows > 0): ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php if ($result->num_rows > 0): ?>
+                        <?php while ($order = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= $order['id'] ?></td>
+                                <td><?= htmlspecialchars($order['user_name']) ?></td>
+                                <td><?= htmlspecialchars($order['user_email']) ?></td>
+                                <td><?= htmlspecialchars($order['product_name']) ?></td>
+                                <td>
+                                    <span class="badge bg-<?= match ($order['status']) {
+                                                                'draft' => 'secondary',
+                                                                'submitted' => 'info',
+                                                                'processing' => 'warning',
+                                                                'shipped' => 'primary',
+                                                                'delivered' => 'success',
+                                                                default => 'dark'
+                                                            } ?>">
+                                        <?= ucfirst($order['status']) ?>
+                                    </span>
+                                </td>
+                                <td><?= ucfirst($order['lens_type']) ?></td>
+                                <td><?= str_replace('_', ' ', ucfirst($order['coating_type'])) ?></td>
+                                <td><?= date("M d, Y", strtotime($order['created_at'])) ?></td>
+                                <td>
+                                    <a href="view_prescription_order.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-info">View</a>
+                                    <a href="edit_prescription_order.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php else: ?>
                         <tr>
-                            <td><?= htmlspecialchars($row['id']) ?></td>
-                            <td><?= htmlspecialchars($row['user_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($row['product_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($row['order_type']) ?></td>
-                            <td>
-                                <?= htmlspecialchars($row['right_eye_sphere']) ?>/<?= htmlspecialchars($row['right_eye_cylinder']) ?>/<?= htmlspecialchars($row['right_eye_axis']) ?>/<?= htmlspecialchars($row['right_eye_pd']) ?>
-                            </td>
-                            <td>
-                                <?= htmlspecialchars($row['left_eye_sphere']) ?>/<?= htmlspecialchars($row['left_eye_cylinder']) ?>/<?= htmlspecialchars($row['left_eye_axis']) ?>/<?= htmlspecialchars($row['left_eye_pd']) ?>
-                            </td>
-                            <td><?= htmlspecialchars($row['lens_type']) ?></td>
-                            <td><?= htmlspecialchars($row['coating_type']) ?></td>
-                            <td><?= htmlspecialchars($row['frame_color']) ?></td>
-                            <td><?= htmlspecialchars($row['frame_size']) ?></td>
-                            <td><?= htmlspecialchars($row['status']) ?></td>
-                            <td><?= htmlspecialchars($row['created_at']) ?></td>
+                            <td colspan="9" class="text-center py-4">No prescription orders found.</td>
                         </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="12" class="text-center">No prescription orders found.</td>
-                    </tr>
-                <?php endif; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

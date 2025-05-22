@@ -33,6 +33,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_email = $_POST['user_email'];
     $active = isset($_POST['active']) ? 1 : 0;
 
+    // Validate name (only letters and spaces)
+    if (!preg_match('/^[a-zA-Z\s]+$/', $user_name)) {
+        $_SESSION['alert_message'] = "Name must contain only letters and spaces.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: edit_user.php?id=" . $user_id);
+        exit();
+    }
+
+    // Validate email (must end with .com and contain @)
+    if (!filter_var($user_email, FILTER_VALIDATE_EMAIL) || !preg_match('/@.+\.com$/', $user_email)) {
+        $_SESSION['alert_message'] = "Email must be valid and end with .com.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: edit_user.php?id=" . $user_id);
+        exit();
+    }
+
     // Update user data in the database
     $stmt = $conn->prepare("UPDATE users SET user_name = ?, user_email = ?, active = ? WHERE id = ?");
     $stmt->bind_param("ssii", $user_name, $user_email, $active, $user_id);
@@ -144,5 +160,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Auto-dismiss alerts after 3 seconds
+    setTimeout(function() {
+        var alert = document.querySelector('.alert-dismissible');
+        if (alert) {
+            var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            bsAlert.close();
+        }
+    }, 3000);
+    </script>
 </body>
 </html>

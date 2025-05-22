@@ -212,14 +212,35 @@ if (isset($_GET["delete_order"])) {
                                 </td>
                                 <td>
                                     <?php
-                                    $products = explode(',', $order['products']);
-                                    $quantities = explode(',', $order['quantities']);
+                                    // Display product names for this order by joining order_items and products
+                                    $order_id = $order['order_id'];
                                     $product_display = '';
-                                    foreach ($products as $index => $product) {
-                                        $qty = isset($quantities[$index]) ? $quantities[$index] : 1;
-                                        $product_display .= htmlspecialchars(trim($product)) . " (x" . htmlspecialchars(trim($qty)) . "), ";
+                                    $has_product = false;
+
+                                    $item_stmt = $conn->prepare("
+                                        SELECT p.name
+                                        FROM order_items oi
+                                        JOIN products p ON oi.product_id = p.id
+                                        WHERE oi.order_id = ?
+                                    ");
+                                    $item_stmt->bind_param("i", $order_id);
+                                    $item_stmt->execute();
+                                    $item_result = $item_stmt->get_result();
+                                    $product_names = [];
+                                    while ($item = $item_result->fetch_assoc()) {
+                                        if (!empty($item['name'])) {
+                                            $has_product = true;
+                                            $product_names[] = htmlspecialchars($item['name']);
+                                        }
                                     }
-                                    echo rtrim($product_display, ", ");
+                                    $item_stmt->close();
+
+                                    if ($has_product) {
+                                        // Display as comma separated, like: Ray-Ban RB2210, Oakley Gascan Sunglasses for Men
+                                        echo implode(', ', $product_names);
+                                    } else {
+                                        echo '<span class="text-muted">No products</span>';
+                                    }
                                     ?>
                                 </td>
                                 <td>रू <?= number_format($order['total_price'], 2); ?></td>
@@ -233,11 +254,11 @@ if (isset($_GET["delete_order"])) {
                                         <input type="hidden" name="update_order_status" value="1">
                                         <input type="hidden" name="order_id" value="<?= $order['order_id']; ?>">
                                         <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                            <option value="pending" <?= $order['status'] == 'pending' ? 'selected' : ''; ?>>Pending</option>
-                                            <option value="processing" <?= $order['status'] == 'processing' ? 'selected' : ''; ?>>Processing</option>
-                                            <option value="shipped" <?= $order['status'] == 'shipped' ? 'selected' : ''; ?>>Shipped</option>
-                                            <option value="completed" <?= $order['status'] == 'completed' ? 'selected' : ''; ?>>Completed</option>
-                                            <option value="cancelled" <?= $order['status'] == 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
+                                            <option value="Pending" <?= $order['status'] == 'Pending' ? 'selected' : ''; ?>>Pending</option>
+                                            <option value="Processing" <?= $order['status'] == 'Processing' ? 'selected' : ''; ?>>Processing</option>
+                                            <option value="Shipped" <?= $order['status'] == 'Shipped' ? 'selected' : ''; ?>>Shipped</option>
+                                            <option value="Delivered" <?= $order['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
+                                            <option value="Cancelled" <?= $order['status'] == 'Cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                                         </select>
                                     </form>
                                 </td>

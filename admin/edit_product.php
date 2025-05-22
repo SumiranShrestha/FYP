@@ -180,6 +180,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
         .delete-btn:hover {
             background: rgba(255, 0, 0, 1);
         }
+
+        .required-asterisk {
+            color: red;
+            margin-left: 2px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -241,14 +247,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Product Name</label>
+                                <label for="name" class="form-label">Product Name<span class="required-asterisk">*</span></label>
                                 <input type="text" class="form-control" id="name" name="name"
                                     value="<?= htmlspecialchars($product['name']); ?>" required>
                             </div>
 
                             <div class="mb-3">
-                                <label for="brand" class="form-label">Brand</label>
-                                <select class="form-select" id="brand" name="brand">
+                                <label for="brand" class="form-label">Brand<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="brand" name="brand" required>
                                     <option value="">Select brand</option>
                                     <?php while ($brand = $brands_result->fetch_assoc()): ?>
                                         <option value="<?= $brand['id']; ?>"
@@ -260,8 +266,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category">
+                                <label for="category" class="form-label">Category<span class="required-asterisk">*</span></label>
+                                <select class="form-select" id="category" name="category" required>
                                     <option value="">Select category</option>
                                     <?php if ($categories_result->num_rows > 0): ?>
                                         <?php while ($category = $categories_result->fetch_assoc()): ?>
@@ -275,7 +281,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="price" class="form-label">Price (रू)</label>
+                                <label for="price" class="form-label">Price (रू)<span class="required-asterisk">*</span></label>
                                 <input type="number" step="0.01" class="form-control" id="price" name="price"
                                     value="<?= $product['price']; ?>" required>
                             </div>
@@ -303,9 +309,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="stock" class="form-label">Stock Quantity</label>
+                                <label for="stock" class="form-label">Stock Quantity<span class="required-asterisk">*</span></label>
                                 <input type="number" class="form-control" id="stock" name="stock"
-                                    value="<?= $product['stock']; ?>">
+                                    value="<?= $product['stock']; ?>" required>
                             </div>
 
                             <div class="mb-3 form-check">
@@ -315,8 +321,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                             </div>
 
                             <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="5"><?= htmlspecialchars($product['description']); ?></textarea>
+                                <label for="description" class="form-label">Description<span class="required-asterisk">*</span></label>
+                                <textarea class="form-control" id="description" name="description" rows="5" required><?= htmlspecialchars($product['description']); ?></textarea>
                             </div>
                         </div>
                     </div>

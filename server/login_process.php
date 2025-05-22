@@ -8,15 +8,33 @@ $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 
 // Adjust column names as per your database
-$stmt = $conn->prepare("SELECT id, user_name, user_password FROM users WHERE user_email = ?");
+$stmt = $conn->prepare("SELECT id, user_name, user_password, active FROM users WHERE user_email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
-if (!$user || !password_verify($password, $user['user_password'])) {
-    echo json_encode(["status" => "error", "message" => "Invalid credentials"]);
+if (!$user) {
+    echo json_encode(["status" => "error", "message" => "Invalid email or password"]);
     exit();
+}
+
+// Check password first
+if (!password_verify($password, $user['user_password'])) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Invalid email or password"
+    ]);
+    exit;
+}
+
+// Now check if inactive (only after password is correct)
+if ($user['active'] == 0) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Your account is inactive"
+    ]);
+    exit;
 }
 
 $_SESSION['user_id'] = $user['id'];

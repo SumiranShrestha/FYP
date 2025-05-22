@@ -1,4 +1,9 @@
 <?php
+
+// Set session lifetime to 4 hours (14400 seconds)
+ini_set('session.gc_maxlifetime', 14400);
+ini_set('session.cookie_lifetime', 0); // Session cookie lasts until browser closes
+
 session_start();
 if (!isset($_SESSION["admin_logged_in"])) {
     header("Location: admin_login.php");

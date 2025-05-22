@@ -16,6 +16,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
     $nmc_number = $_POST['nmc_number'];
     $specialization = $_POST['specialization'];
 
+    // Email validation
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['alert_message'] = "Please enter a valid email address.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: add_doctor.php");
+        exit();
+    }
+
+    // Phone number validation: exactly 10 digits, numbers only
+    if (!preg_match('/^\d{10}$/', $phone)) {
+        $_SESSION['alert_message'] = "Phone number must be exactly 10 digits and contain only numbers.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: add_doctor.php");
+        exit();
+    }
+
+    // NMC number validation: alphanumeric, 6-12 chars (adjust as needed)
+    if (!preg_match('/^[a-zA-Z0-9]{6,12}$/', $nmc_number)) {
+        $_SESSION['alert_message'] = "NMC Number must be 6-12 alphanumeric characters.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: add_doctor.php");
+        exit();
+    }
+
     // Check if email already exists
     $stmt = $conn->prepare("SELECT id FROM doctors WHERE email = ?");
     $stmt->bind_param("s", $email);
@@ -136,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Email *</label>
-                                <input type="email" name="email" class="form-control" required />
+                                <input type="email" name="email" class="form-control" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Enter a valid email address" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Password *</label>
@@ -144,11 +168,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Phone Number *</label>
-                                <input type="text" name="phone" class="form-control" required />
+                                <input type="text" name="phone" class="form-control" required pattern="\d{10}" maxlength="10" inputmode="numeric" title="Enter a 10-digit phone number (numbers only)" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">NMC Number *</label>
-                                <input type="text" name="nmc_number" class="form-control" required />
+                                <input type="text" name="nmc_number" class="form-control" required pattern="[a-zA-Z0-9]{6,12}" maxlength="12" title="6-12 alphanumeric characters" />
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Specialization</label>
