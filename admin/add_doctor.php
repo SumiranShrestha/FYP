@@ -11,10 +11,21 @@ include('server/connection.php'); // Include database connection
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
     $full_name = $_POST['full_name'];
     $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = $_POST['password'];
+    $re_password = $_POST['re_password'];
     $phone = $_POST['phone'];
     $nmc_number = $_POST['nmc_number'];
     $specialization = $_POST['specialization'];
+
+    // Password match validation
+    if ($password !== $re_password) {
+        $_SESSION['alert_message'] = "Passwords do not match. Please re-enter.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: add_doctor.php");
+        exit();
+    }
+
+    $password_hashed = password_hash($password, PASSWORD_DEFAULT);
 
     // Email validation
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -71,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
         // Insert doctor into the `doctors` table
         $stmt = $conn->prepare("INSERT INTO doctors (full_name, email, password, phone, nmc_number, specialization, availability) 
                                 VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssss", $full_name, $email, $password, $phone, $nmc_number, $specialization, $availability_json);
+        $stmt->bind_param("sssssss", $full_name, $email, $password_hashed, $phone, $nmc_number, $specialization, $availability_json);
 
         if ($stmt->execute()) {
             $_SESSION['alert_message'] = "Doctor created successfully";
@@ -167,6 +178,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                                 <input type="password" name="password" class="form-control" required />
                             </div>
                             <div class="mb-3">
+                                <label class="form-label">Re-enter Password *</label>
+                                <input type="password" name="re_password" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label">Phone Number *</label>
                                 <input type="text" name="phone" class="form-control" required pattern="\d{10}" maxlength="10" inputmode="numeric" title="Enter a 10-digit phone number (numbers only)" />
                             </div>
@@ -183,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                             <h6 class="card-subtitle mb-2 text-muted">Availability</h6>
                             <p>Select the days the doctor is available and enter the time.</p>
                             <?php 
-                            $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',];
                             foreach ($daysOfWeek as $day): ?>
                                 <div class="mb-3 form-check">
                                     <input type="checkbox" class="form-check-input" id="availability_<?= $day ?>" name="availability[<?= $day ?>]" onclick="toggleTimeInput('<?= $day ?>')">

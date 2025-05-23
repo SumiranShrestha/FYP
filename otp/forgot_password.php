@@ -10,7 +10,8 @@ require '../PHPMailer-master/src/PHPMailer.php';
 require '../PHPMailer-master/src/SMTP.php';
 require '../PHPMailer-master/src/Exception.php';
 
-$redirect_script = ''; // Add this variable to store any JS redirect
+$redirect_script = '';
+$error = ''; // Add this to store error messages
 
 if (isset($_POST['submit_email'])) {
   $email = $_POST['email'];
@@ -87,15 +88,9 @@ if (isset($_POST['submit_email'])) {
         $error = "Mailer Error: " . $mail->ErrorInfo;
       }
     } else {
-      // If email is not found in both users and doctors tables, ask the user
-      $redirect_script = "<script>
-                var userType = confirm('Email not found. Are you a doctor? Click OK for Doctor or Cancel for User.');
-                if (userType) {
-                    window.location.href = 'doctor_reset_password.php?email=$email'; // Redirect to doctor reset page
-                } else {
-                    window.location.href = 'user_reset_password.php?email=$email'; // Redirect to user reset page
-                }
-            </script>";
+      // If email is not found in both users and doctors tables, show error
+      $error = "This email is not registered. Please register an account.";
+      // Do not set $redirect_script or show confirm dialog
     }
   }
 }
@@ -115,7 +110,7 @@ if (!empty($redirect_script)) {
     <h2 class="mb-4">Forgot Password</h2>
     <p class="text-muted">Enter your registered email address to receive an OTP for password reset.</p>
     <hr class="mx-auto w-50">
-    <?php if (isset($error)): ?>
+    <?php if (!empty($error)): ?>
       <div class="alert alert-danger w-50 mx-auto" role="alert">
         <?php echo $error; ?>
       </div>

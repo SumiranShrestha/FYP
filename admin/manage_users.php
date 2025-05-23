@@ -91,9 +91,10 @@ $result = $conn->query("
           <span class="text-light me-3">
             Welcome, <?= htmlspecialchars($_SESSION["admin_username"] ?? ''); ?>
           </span>
-          <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+          <!-- Logout button triggers modal -->
+          <button id="logoutBtn" class="btn btn-outline-light btn-sm">
             <i class="bi bi-box-arrow-right me-1"></i>Logout
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -174,11 +175,14 @@ $result = $conn->query("
                         <a href="view_user.php?id=<?= $u['id'] ?>" class="btn btn-info">
                           <i class="bi bi-eye"></i>
                         </a>
-                        <a href="manage_users.php?delete_user=<?= $u['id'] ?>"
-                           class="btn btn-danger"
-                           onclick="return confirm('Delete this user?');">
+                        <!-- Delete Button triggers modal -->
+                        <button 
+                          class="btn btn-danger delete-user-btn"
+                          data-id="<?= $u['id'] ?>"
+                          data-name="<?= htmlspecialchars($u['user_name']) ?>"
+                        >
                           <i class="bi bi-trash"></i>
-                        </a>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -195,10 +199,44 @@ $result = $conn->query("
     </div>
   </div>
 
+  <!-- Delete User Confirmation Modal -->
+  <div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+        <div class="modal-body text-center py-4">
+          <h5 class="fw-bold mb-3">Delete User</h5>
+          <div class="mb-4">
+            Are you sure you want to delete <span id="userName" class="fw-bold"></span>?
+          </div>
+          <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+            <a href="#" id="confirmDeleteUserBtn" class="btn btn-primary px-4">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="bg-light py-4 mt-5 text-center">
     &copy; <?= date('Y') ?> Admin Panel. All rights reserved.
   </footer>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+        <div class="modal-body text-center py-4">
+          <h5 class="fw-bold mb-3">Logout</h5>
+          <div class="mb-4">Are you sure you want to logout?</div>
+          <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+            <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -220,6 +258,25 @@ $result = $conn->query("
       bsAlert.close();
     }
   }, 3000);
+
+  // Logout confirmation logic
+  document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+    modal.show();
+  });
+
+  // Delete user modal logic
+  document.querySelectorAll('.delete-user-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var userId = this.getAttribute('data-id');
+      var userName = this.getAttribute('data-name');
+      document.getElementById('userName').textContent = userName;
+      document.getElementById('confirmDeleteUserBtn').setAttribute('href', 'manage_users.php?delete_user=' + userId);
+      var modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+      modal.show();
+    });
+  });
   </script>
 </body>
 </html>

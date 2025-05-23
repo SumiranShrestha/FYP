@@ -137,6 +137,10 @@ $final_total = $total_price + $shipping_cost;
                     showToast("cartErrorToast", "Not enough stock available!");
                     return;
                 }
+                if (action === "decrease" && currentQuantity <= 1) {
+                    showToast("cartErrorToast", "Quantity cannot be less than 1!");
+                    return;
+                }
 
                 fetch("server/update_cart.php", {
                         method: "POST",
@@ -151,9 +155,10 @@ $final_total = $total_price + $shipping_cost;
                             document.getElementById(`quantity-${productId}`).textContent = data.quantity;
                             updateTotalPrice();
                             showToast("cartToast", "Cart updated successfully!");
-                            if (data.quantity === 0) {
-                                document.getElementById(`row-${productId}`).remove();
-                            }
+                            // Prevent removing row if quantity is 0 (should never happen now)
+                            // if (data.quantity === 0) {
+                            //     document.getElementById(`row-${productId}`).remove();
+                            // }
                         } else {
                             showToast("cartErrorToast", data.message);
                         }

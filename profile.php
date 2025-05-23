@@ -42,6 +42,7 @@ while ($row = $order_result->fetch_assoc()) {
     $orders[] = $row;
 }
 
+
 // Fetch user's appointments
 $appointments = [];
 if ($user_type === 'customer') {
@@ -207,7 +208,7 @@ unset($_SESSION['alert_type']);
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Phone</label>
-                                            <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" />
+                                            <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($user['phone'] ?? ''); ?>" pattern="\d{10}" maxlength="10" title="Phone number must be exactly 10 digits" required id="phoneInput" />
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Address</label>
@@ -327,8 +328,8 @@ unset($_SESSION['alert_type']);
                                                         <td>Rs <?= number_format($order['total_price'], 2); ?></td>
                                                         <td>
                                                             <span class="badge 
-                                                                <?= $order['status'] === 'delivered' ? 'bg-success' : ($order['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
-                                                                <?= ucfirst($order['status']) ?>
+                                                                <?= strtolower($order['status']) === 'delivered' ? 'bg-success' : (strtolower($order['status']) === 'cancelled' ? 'bg-danger' : (strtolower($order['status']) === 'pending' ? 'bg-warning' : 'bg-secondary')) ?>">
+                                                                <?= ucfirst(strtolower($order['status'])) ?>
                                                             </span>
                                                         </td>
                                                         <td>
@@ -369,7 +370,7 @@ unset($_SESSION['alert_type']);
                                                         <td><?= htmlspecialchars($appointment[$user_type === 'doctor' ? 'patient_name' : 'doctor_name']); ?></td>
                                                         <td>
                                                             <span class="badge 
-                                                                <?= $appointment['status'] === 'completed' ? 'bg-success' : ($appointment['status'] === 'cancelled' ? 'bg-danger' : 'bg-warning') ?>">
+                                                                <?= $appointment['status'] === 'completed' ? 'bg-success' : ($appointment['status'] === 'cancelled' ? 'bg-danger' : ($appointment['status'] === 'pending' ? 'bg-warning' : ($appointment['status'] === 'confirmed' ? 'bg-success' : 'bg-secondary'))) ?>">
                                                                 <?= ucfirst($appointment['status']) ?>
                                                             </span>
                                                         </td>
@@ -508,12 +509,27 @@ unset($_SESSION['alert_type']);
                 bsToast.hide();
             }, 5000);
         }
-        // Initialize tab functionality
-        const profileTabs = document.querySelector('#profileTabs');
-        if (profileTabs) {
-            const tab = new bootstrap.Tab(profileTabs.querySelector('button[data-bs-target="#profile"]'));
-            tab.show();
-        }
+        // Persist active tab using localStorage
+        document.addEventListener("DOMContentLoaded", function() {
+            const profileTabs = document.querySelector('#profileTabs');
+            const tabButtons = profileTabs ? profileTabs.querySelectorAll('button[data-bs-toggle="pill"]') : [];
+            const tabContent = document.querySelector('#profileTabsContent');
+            // Restore last active tab
+            const lastTab = localStorage.getItem('profileActiveTab');
+            if (lastTab && tabButtons.length) {
+                const tabBtn = profileTabs.querySelector(`button[data-bs-target="${lastTab}"]`);
+                if (tabBtn) {
+                    const bsTab = new bootstrap.Tab(tabBtn);
+                    bsTab.show();
+                }
+            }
+            // Save tab on change
+            tabButtons.forEach(btn => {
+                btn.addEventListener('shown.bs.tab', function(e) {
+                    localStorage.setItem('profileActiveTab', this.getAttribute('data-bs-target'));
+                });
+            });
+        });
 
         // Auto-hide alert after 3 seconds
         document.addEventListener("DOMContentLoaded", function() {
@@ -523,6 +539,23 @@ unset($_SESSION['alert_type']);
                     var alert = bootstrap.Alert.getOrCreateInstance(alertBox);
                     alert.close();
                 }, 3000);
+            }
+        });
+
+        // Phone number validation for profile update
+        document.addEventListener("DOMContentLoaded", function() {
+            var phoneInput = document.getElementById('phoneInput');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function() {
+                    // Remove non-digit characters
+                    this.value = this.value.replace(/\D/g, '');
+                });
+                phoneInput.addEventListener('invalid', function() {
+                    this.setCustomValidity('Phone number must be exactly 10 digits.');
+                });
+                phoneInput.addEventListener('input', function() {
+                    this.setCustomValidity('');
+                });
             }
         });
     </script>

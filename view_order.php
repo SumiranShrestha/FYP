@@ -69,7 +69,12 @@ while ($row = $order_items_result->fetch_assoc()) {
       </div>
       <div class="card-body">
           <p><strong>Total Amount:</strong> Rs <?= number_format($order['total_price'], 2); ?></p>
-          <p><strong>Status:</strong> <?= ucfirst(htmlspecialchars($order['status'])); ?></p>
+          <p><strong>Status:</strong>
+            <span class="badge 
+                <?= strtolower($order['status']) === 'delivered' ? 'bg-success' : (strtolower($order['status']) === 'cancelled' ? 'bg-danger' : (strtolower($order['status']) === 'pending' ? 'bg-warning' : 'bg-secondary')) ?>">
+                <?= ucfirst(strtolower($order['status'])) ?>
+            </span>
+          </p>
           <!-- Add any additional order details you want to display here -->
       </div>
     </div>

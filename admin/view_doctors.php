@@ -24,6 +24,7 @@ unset($_SESSION['alert_type']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -33,6 +34,7 @@ unset($_SESSION['alert_type']);
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
@@ -61,9 +63,10 @@ unset($_SESSION['alert_type']);
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($_SESSION["admin_username"]); ?></span>
-                    <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+                    <!-- Logout button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -111,9 +114,9 @@ unset($_SESSION['alert_type']);
 
                                         <!-- Decode availability JSON and display it in a readable format -->
                                         <td>
-                                            <?php 
+                                            <?php
                                             $availability = json_decode($doctor['availability'], true);
-                                            
+
                                             // Check if availability is a valid array
                                             if (is_array($availability) && !empty($availability)) {
                                                 echo "<ul>";
@@ -138,10 +141,13 @@ unset($_SESSION['alert_type']);
                                             <a href="edit_doctor.php?id=<?= $doctor['id']; ?>" class="btn btn-sm btn-warning">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </a>
-                                            <!-- Delete Button -->
-                                            <a href="delete_doctor.php?id=<?= $doctor['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this doctor?');">
+                                            <!-- Delete Button triggers modal -->
+                                            <button
+                                                class="btn btn-sm btn-danger delete-doctor-btn"
+                                                data-id="<?= $doctor['id']; ?>"
+                                                data-name="<?= htmlspecialchars($doctor['full_name']); ?>">
                                                 <i class="bi bi-trash"></i> Delete
-                                            </a>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -160,7 +166,61 @@ unset($_SESSION['alert_type']);
         </div>
     </footer>
 
+    <!-- Delete Doctor Confirmation Modal -->
+    <div class="modal fade" id="deleteDoctorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Doctor</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete Dr. <span id="doctorName" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteDoctorBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Delete doctor modal logic
+        document.querySelectorAll('.delete-doctor-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var doctorId = this.getAttribute('data-id');
+                var doctorName = this.getAttribute('data-name');
+                document.getElementById('doctorName').textContent = doctorName;
+                document.getElementById('confirmDeleteDoctorBtn').setAttribute('href', 'delete_doctor.php?id=' + doctorId);
+                var modal = new bootstrap.Modal(document.getElementById('deleteDoctorModal'));
+                modal.show();
+            });
+        });
+
+        // Logout confirmation logic
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+            modal.show();
+        });
+    </script>
 </body>
 </html>

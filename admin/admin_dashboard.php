@@ -56,9 +56,10 @@ if (!isset($_SESSION["admin_logged_in"])) {
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($_SESSION["admin_username"]); ?></span>
-                    <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+                    <!-- Update logout button to trigger modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -211,7 +212,35 @@ if (!isset($_SESSION["admin_logged_in"])) {
         </div>
     </footer>
 
+    <!-- Logout Confirmation Modal (styled like header.php) -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal" id="cancelLogoutBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary px-4" id="confirmLogoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Logout confirmation logic (same as header.php)
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+        modal.show();
+    });
+    document.getElementById('confirmLogoutBtn').addEventListener('click', function() {
+        window.location.href = "admin_logout.php";
+    });
+    // Cancel handled by data-bs-dismiss
+    </script>
 </body>
 </html>

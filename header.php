@@ -340,7 +340,12 @@ if (isset($_SESSION["user_id"])) {
                 container.empty();
 
                 if (!data.items || data.items.length === 0) {
-                    container.html('<p class="text-muted text-center">Your cart is empty.</p>');
+                    container.html(`
+                        <div class="text-center">
+                            <img src="images/cart.png" alt="Empty Cart" class="img-fluid" style="max-width: 150px;">
+                            <div class="mt-3 text-danger" style="font-size:1rem;">Your cart is empty.</div>
+                        </div>
+                    `);
                     $("#cartTotal").text("Rs 0");
                     $("#cartBadge").hide();
                     return;
@@ -457,7 +462,7 @@ if (isset($_SESSION["user_id"])) {
         // });
 
         // Real-time user active status check
-        <?php if (isset($_SESSION["user_id"])): ?>
+        <?php if (isset($_SESSION["user_id"]) && ($user_type === 'user' || $user_type === '')): ?>
         setInterval(function() {
             $.ajax({
                 url: "server/check_user_active.php",

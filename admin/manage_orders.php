@@ -163,9 +163,10 @@ if (isset($_GET["delete_order"])) {
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3">Welcome, <?= htmlspecialchars($_SESSION["admin_username"]); ?></span>
-                    <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+                    <!-- Logout button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -267,9 +268,13 @@ if (isset($_GET["delete_order"])) {
                                         <a href="view_order.php?id=<?= $order['order_id']; ?>" class="btn btn-info">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="manage_orders.php?delete_order=<?= $order['order_id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this order?')">
+                                        <!-- Delete Button triggers modal -->
+                                        <button 
+                                            class="btn btn-danger delete-order-btn"
+                                            data-id="<?= $order['order_id']; ?>"
+                                        >
                                             <i class="bi bi-trash"></i>
-                                        </a>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -284,7 +289,58 @@ if (isset($_GET["delete_order"])) {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <!-- Delete Order Confirmation Modal -->
+    <div class="modal fade" id="deleteOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Order</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete this order?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteOrderBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Logout confirmation logic
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+        modal.show();
+    });
+
+    // Delete order modal logic
+    document.querySelectorAll('.delete-order-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var orderId = this.getAttribute('data-id');
+            document.getElementById('confirmDeleteOrderBtn').setAttribute('href', 'manage_orders.php?delete_order=' + orderId);
+            var modal = new bootstrap.Modal(document.getElementById('deleteOrderModal'));
+            modal.show();
+        });
+    });
+    </script>
+</body>
 </html>

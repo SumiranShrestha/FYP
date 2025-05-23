@@ -68,8 +68,7 @@ if (isset($_GET['delete_brand'])) {
     exit();
 }
 ?>
-
-<!DOCTYPE html>
+vi<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -107,9 +106,10 @@ if (isset($_GET['delete_brand'])) {
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($_SESSION["admin_username"]); ?></span>
-                    <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+                    <!-- Logout button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -159,8 +159,14 @@ if (isset($_GET['delete_brand'])) {
                         <!-- Update Brand Form -->
                         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#updateBrandModal" onclick="fillUpdateForm(<?= $brand['id'] ?>, '<?= htmlspecialchars($brand['brand_name']) ?>')">Edit</button>
 
-                        <!-- Delete Brand -->
-                        <a href="manage_brands.php?delete_brand=<?= $brand['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this brand?')">Delete</a>
+                        <!-- Delete Button triggers modal -->
+                        <button 
+                            class="btn btn-danger delete-brand-btn"
+                            data-id="<?= $brand['id']; ?>"
+                            data-name="<?= htmlspecialchars($brand['brand_name']); ?>"
+                        >
+                            Delete
+                        </button>
                     </td>
                 </tr>
             <?php endwhile; ?>
@@ -189,16 +195,69 @@ if (isset($_GET['delete_brand'])) {
         </div>
     </div>
 
+    <!-- Delete Brand Confirmation Modal -->
+    <div class="modal fade" id="deleteBrandModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Brand</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete <span id="brandName" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteBrandBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+            <div class="modal-body text-center py-4">
+                <h5 class="fw-bold mb-3">Logout</h5>
+                <div class="mb-4">Are you sure you want to logout?</div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                    <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function fillUpdateForm(id, name) {
         document.getElementById('brand_id').value = id;
         document.getElementById('update_brand_name').value = name;
     }
+
+    // Delete brand modal logic
+    document.querySelectorAll('.delete-brand-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var brandId = this.getAttribute('data-id');
+            var brandName = this.getAttribute('data-name');
+            document.getElementById('brandName').textContent = brandName;
+            document.getElementById('confirmDeleteBrandBtn').setAttribute('href', 'manage_brands.php?delete_brand=' + brandId);
+            var modal = new bootstrap.Modal(document.getElementById('deleteBrandModal'));
+            modal.show();
+        });
+    });
+
+    // Logout confirmation logic
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+        modal.show();
+    });
 </script>
 
 </body>

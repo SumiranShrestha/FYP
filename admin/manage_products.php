@@ -173,9 +173,10 @@ $result = $conn->query("
                 </ul>
                 <div class="d-flex align-items-center">
                     <span class="text-light me-3">Welcome, <?= htmlspecialchars($_SESSION["admin_username"]); ?></span>
-                    <a href="admin_logout.php" class="btn btn-outline-light btn-sm">
+                    <!-- Logout button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
@@ -351,11 +352,14 @@ $result = $conn->query("
                                                         <a href="view_product.php?id=<?= $product['id']; ?>" class="btn btn-info">
                                                             <i class="bi bi-eye"></i>
                                                         </a>
-                                                        <a href="manage_products.php?delete_product=<?= $product['id']; ?>"
-                                                            class="btn btn-danger"
-                                                            onclick="return confirm('Are you sure you want to delete this product?')">
+                                                        <!-- Delete Button triggers modal -->
+                                                        <button 
+                                                            class="btn btn-danger delete-product-btn"
+                                                            data-id="<?= $product['id']; ?>"
+                                                            data-name="<?= htmlspecialchars($product['name']); ?>"
+                                                        >
                                                             <i class="bi bi-trash"></i>
-                                                        </a>
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -371,6 +375,40 @@ $result = $conn->query("
                     </div>
                     <div class="card-footer bg-light">
                         <small class="text-muted">Showing <?= $result->num_rows ?> products</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Product Confirmation Modal -->
+    <div class="modal fade" id="deleteProductModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Product</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete <span id="productName" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteProductBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
                     </div>
                 </div>
             </div>
@@ -404,6 +442,25 @@ $result = $conn->query("
                         row.style.display = 'none';
                     }
                 }
+            });
+
+            // Delete product modal logic
+            document.querySelectorAll('.delete-product-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var productId = this.getAttribute('data-id');
+                    var productName = this.getAttribute('data-name');
+                    document.getElementById('productName').textContent = productName;
+                    document.getElementById('confirmDeleteProductBtn').setAttribute('href', 'manage_products.php?delete_product=' + productId);
+                    var modal = new bootstrap.Modal(document.getElementById('deleteProductModal'));
+                    modal.show();
+                });
+            });
+
+            // Logout confirmation logic
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+                modal.show();
             });
         });
     </script>

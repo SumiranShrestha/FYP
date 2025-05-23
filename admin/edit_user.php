@@ -158,6 +158,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </footer>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -169,6 +185,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             bsAlert.close();
         }
     }, 3000);
+
+    // Logout confirmation logic
+    document.addEventListener('DOMContentLoaded', function () {
+        var logoutBtn = document.querySelector('.btn-outline-light.btn-sm');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+                modal.show();
+            });
+        }
+    });
     </script>
 </body>
 </html>

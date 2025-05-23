@@ -71,7 +71,8 @@ $stmt->close();
         <div class="mb-3">
           <label for="phone" class="form-label">Phone</label>
           <input type="text" id="phone" name="phone" class="form-control"
-                 value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
+                 value="<?= htmlspecialchars($user['phone'] ?? '') ?>"
+                 pattern="\d{10}" maxlength="10" title="Phone number must be exactly 10 digits" required>
         </div>
 
         <div class="mb-3">
@@ -95,6 +96,24 @@ $stmt->close();
 
   <!-- Bootstrap Bundle JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  // Phone number validation for edit profile
+  document.addEventListener("DOMContentLoaded", function() {
+      var phoneInput = document.getElementById('phone');
+      if (phoneInput) {
+          phoneInput.addEventListener('input', function() {
+              // Remove non-digit characters
+              this.value = this.value.replace(/\D/g, '');
+          });
+          phoneInput.addEventListener('invalid', function() {
+              this.setCustomValidity('Phone number must be exactly 10 digits.');
+          });
+          phoneInput.addEventListener('input', function() {
+              this.setCustomValidity('');
+          });
+      }
+  });
+  </script>
 </body>
 </html>
 
