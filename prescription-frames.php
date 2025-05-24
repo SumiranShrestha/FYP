@@ -12,6 +12,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_prescription_i
     if (isset($_SESSION['user_id'])) {
         $delete_id = intval($_POST['delete_prescription_id']);
         $user_id = $_SESSION['user_id'];
+
+        // First, set prescription_id to NULL in cart for this prescription
+        $stmt = $conn->prepare("UPDATE cart SET prescription_id = NULL WHERE prescription_id = ?");
+        $stmt->bind_param("i", $delete_id);
+        $stmt->execute();
+
+        // Now, delete the prescription
         $stmt = $conn->prepare("DELETE FROM prescription_frames WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $delete_id, $user_id);
         $stmt->execute();
@@ -45,79 +52,116 @@ if (isset($_SESSION['user_id'])) {
 ?>
 
 <main class="container my-5">
-    <h2 class="text-center mb-4">Prescription Frames</h2>
-
-    <!-- Search and Price Filter Form -->
-    <form class="mb-4" method="GET" action="">
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <input type="text" name="search" class="form-control" placeholder="Search by name or brand" value="<?= htmlspecialchars($search_query) ?>">
-            </div>
-            <div class="col-md-3 mb-3">
-                <input type="number" name="min_price" class="form-control" placeholder="Min Price" value="<?= htmlspecialchars($min_price) ?>" min="0">
-            </div>
-            <div class="col-md-3 mb-3">
-                <input type="number" name="max_price" class="form-control" placeholder="Max Price" value="<?= htmlspecialchars($max_price) ?>" min="0">
-            </div>
-            <div class="col-md-2 mb-3">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header mb-4">
+                <h2 class="text-primary fw-bold">Prescription Frames</h2>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="mt-3">
+                        <a href="customize_prescription.php" class="btn btn-success btn-lg">
+                            <i class="bi bi-plus-circle-fill me-2"></i>Add New Prescription
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
-    </form>
+    </div>
 
-    <!-- Saved Prescriptions -->
+    <!-- Search and Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Search Products</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Search by name or brand" value="<?= htmlspecialchars($search_query) ?>">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Min Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" name="min_price" class="form-control" placeholder="0" value="<?= htmlspecialchars($min_price) ?>" min="0">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Max Price</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" name="max_price" class="form-control" placeholder="10000" value="<?= htmlspecialchars($max_price) ?>" min="0">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel-fill me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Saved Prescriptions Section -->
     <?php if (!empty($prescriptions)): ?>
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5>Your Saved Prescriptions</h5>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-clipboard2-pulse me-2"></i>Your Saved Prescriptions</h5>
             </div>
             <div class="card-body">
-                <div class="row row-cols-1 row-cols-md-3 g-3">
+                <div class="row row-cols-1 row-cols-md-3 g-4">
                     <?php foreach ($prescriptions as $prescription): ?>
                         <div class="col">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body position-relative">
-                                    <div class="position-absolute top-0 end-0 mt-2 me-2 z-2">
-                                        <div class="btn-group" role="group">
+                            <div class="card h-100 prescription-card border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-calendar3 me-2"></i>
+                                            <?= date('M d, Y', strtotime($prescription['created_at'])) ?>
+                                        </h6>
+                                        <div class="btn-group">
                                             <a href="edit_prescription.php?prescription_id=<?= $prescription['id'] ?>"
-                                                class="btn btn-sm btn-outline-secondary"
-                                                data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Prescription">
-                                                <i class="bi bi-pencil-square"></i>
+                                                class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="tooltip" title="Edit">
+                                                <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this prescription?');" class="d-inline m-0 p-0">
-                                                <input type="hidden" name="delete_prescription_id" value="<?= $prescription['id'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Prescription">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="deletePrescription(<?= $prescription['id'] ?>)"
+                                                data-bs-toggle="tooltip" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </div>
-                                    <h6 class="card-title">Prescription from <?= date('M d, Y', strtotime($prescription['created_at'])) ?></h6>
-                                    <div class="row small">
-                                        <div class="col-6">
-                                            <p class="mb-1"><strong>Right Eye:</strong></p>
-                                            <p>
-                                                SPH: <?= $prescription['right_eye_sphere'] ?><br>
-                                                CYL: <?= $prescription['right_eye_cylinder'] ?><br>
-                                                Axis: <?= $prescription['right_eye_axis'] ?>
-                                            </p>
-                                        </div>
-                                        <div class="col-6">
-                                            <p class="mb-1"><strong>Left Eye:</strong></p>
-                                            <p>
-                                                SPH: <?= $prescription['left_eye_sphere'] ?><br>
-                                                CYL: <?= $prescription['left_eye_cylinder'] ?><br>
-                                                Axis: <?= $prescription['left_eye_axis'] ?>
-                                            </p>
+                                    <div class="prescription-details">
+                                        <div class="row g-3">
+                                            <div class="col-6">
+                                                <div class="eye-section">
+                                                    <h6 class="text-primary mb-2">Right Eye</h6>
+                                                    <div class="specs-info">
+                                                        <p class="mb-1">SPH: <?= $prescription['right_eye_sphere'] ?></p>
+                                                        <p class="mb-1">CYL: <?= $prescription['right_eye_cylinder'] ?></p>
+                                                        <p class="mb-1">Axis: <?= $prescription['right_eye_axis'] ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="eye-section">
+                                                    <h6 class="text-primary mb-2">Left Eye</h6>
+                                                    <div class="specs-info">
+                                                        <p class="mb-1">SPH: <?= $prescription['left_eye_sphere'] ?></p>
+                                                        <p class="mb-1">CYL: <?= $prescription['left_eye_cylinder'] ?></p>
+                                                        <p class="mb-1">Axis: <?= $prescription['left_eye_axis'] ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="d-grid mt-2 gap-2">
-                                        <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>"
-                                            class="btn btn-sm btn-outline-primary mb-1">
-                                            Use This Prescription
-                                        </a>
-                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0">
+                                    <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>"
+                                        class="btn btn-outline-primary w-100">
+                                        <i class="bi bi-eye-fill me-2"></i>Use This Prescription
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -127,6 +171,7 @@ if (isset($_SESSION['user_id'])) {
         </div>
     <?php endif; ?>
 
+    <!-- Products Grid -->
     <div class="row row-cols-1 row-cols-md-3 g-4">
         <?php foreach ($products as $product):
             $images = json_decode($product['images'], true);
@@ -216,17 +261,43 @@ if (isset($_SESSION['user_id'])) {
         border: none;
         margin-bottom: 10px;
         background: #fff;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     }
 
-    .product-card-custom .card-body {
-        padding: 1.2rem 1rem 1.5rem 1rem;
+    .product-card-custom:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
-    .card-title {
-        font-weight: 700;
-        color: #444;
-        min-height: 48px;
-        margin-bottom: 0.5rem;
+    .page-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+
+    .prescription-card {
+        transition: transform 0.2s ease-in-out;
+        border-radius: 12px;
+    }
+
+    .prescription-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .specs-info {
+        background-color: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+
+    .eye-section h6 {
+        font-weight: 600;
+    }
+
+    .btn-group {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 6px;
+        overflow: hidden;
     }
 
     .old-price-custom {
@@ -293,6 +364,16 @@ if (isset($_SESSION['user_id'])) {
 </style>
 
 <script>
+    function deletePrescription(id) {
+        if (confirm('Are you sure you want to delete this prescription?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.innerHTML = `<input type="hidden" name="delete_prescription_id" value="${id}">`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
     // Update the price range values dynamically when changed
     function updatePriceRange() {
         var range = document.getElementById('price_range');

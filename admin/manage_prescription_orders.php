@@ -9,10 +9,17 @@ if (!isset($_SESSION["admin_logged_in"])) {
 
 // Fetch all prescription orders with user, product and prescription info
 $query = "
-SELECT po.*, u.user_name, u.user_email, p.name AS product_name 
+SELECT 
+    po.*, 
+    u.user_name, 
+    u.user_email, 
+    p.name AS product_name, 
+    o.id AS order_table_id
 FROM prescription_orders po
 JOIN users u ON po.user_id = u.id
 JOIN products p ON po.product_id = p.id
+LEFT JOIN orders o ON po.prescription_id = o.prescription_id AND po.user_id = o.user_id
+WHERE p.prescription_required = 1
 ORDER BY po.created_at DESC
 ";
 
@@ -45,6 +52,7 @@ $result = $conn->query($query);
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
+                        <th>Order ID</th>
                         <th>User</th>
                         <th>Email</th>
                         <th>Product</th>
@@ -60,6 +68,7 @@ $result = $conn->query($query);
                         <?php while ($order = $result->fetch_assoc()): ?>
                             <tr>
                                 <td><?= $order['id'] ?></td>
+                                <td><?= $order['order_table_id'] ? htmlspecialchars($order['order_table_id']) : '<span class="text-muted">N/A</span>' ?></td>
                                 <td><?= htmlspecialchars($order['user_name']) ?></td>
                                 <td><?= htmlspecialchars($order['user_email']) ?></td>
                                 <td><?= htmlspecialchars($order['product_name']) ?></td>
@@ -86,7 +95,7 @@ $result = $conn->query($query);
                         <?php endwhile; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" class="text-center py-4">No prescription orders found.</td>
+                            <td colspan="10" class="text-center py-4">No prescription orders found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>

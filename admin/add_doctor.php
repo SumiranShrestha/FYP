@@ -64,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
         $availability = isset($_POST['availability']) ? $_POST['availability'] : [];
         $availability_times = isset($_POST['availability_times']) ? $_POST['availability_times'] : [];
         $availability_data = [];
+        $time_format_regex = '/^(0?[1-9]|1[0-2]):[0-5][0-9]\s?(AM|PM)$/i';
         foreach ($availability as $day => $checked) {
             if (isset($availability_times[$day])) {
                 $times = $availability_times[$day];
@@ -71,6 +72,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                     $slots = array_filter(array_map('trim', explode(',', $times)));
                 } else {
                     $slots = array_filter(array_map('trim', $times));
+                }
+                // Validate each slot for correct format
+                foreach ($slots as $slot) {
+                    if (!preg_match($time_format_regex, $slot)) {
+                        $_SESSION['alert_message'] = "Invalid time format for $day: '$slot'. Please use format like 9:00 AM.";
+                        $_SESSION['alert_type'] = "danger";
+                        header("Location: add_doctor.php");
+                        exit();
+                    }
                 }
                 if (!empty($slots)) {
                     $availability_data[$day] = $slots;
@@ -87,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
         if ($stmt->execute()) {
             $_SESSION['alert_message'] = "Doctor created successfully";
             $_SESSION['alert_type'] = "success";
-            header("Location: view_doctors.php");
+            header("Location: manage_doctors.php");
             exit();
         } else {
             $_SESSION['alert_message'] = "Failed to create doctor";
@@ -131,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_doctor'])) {
                         <a class="nav-link active" href="add_doctor.php">Add Doctor</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="view_doctors.php">Doctors</a>
+                        <a class="nav-link" href="manage_doctors.php">Doctors</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">

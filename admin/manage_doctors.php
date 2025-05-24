@@ -92,14 +92,35 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
                                         <td><?= htmlspecialchars($doctor['phone']); ?></td>
                                         <td><?= htmlspecialchars($doctor['nmc_number']); ?></td>
                                         <td><?= htmlspecialchars($doctor['specialization']); ?></td>
-                                        <td><?= htmlspecialchars($doctor['availability']); ?></td>
+                                        <td>
+                                            <?php
+                                            $availability = json_decode($doctor['availability'], true);
+                                            if (is_array($availability) && !empty($availability)) {
+                                                echo "<ul>";
+                                                foreach ($availability as $day => $time) {
+                                                    if (is_array($time)) {
+                                                        $displayTime = htmlspecialchars(implode(', ', $time));
+                                                    } else {
+                                                        $displayTime = htmlspecialchars($time);
+                                                    }
+                                                    echo "<li><strong>" . htmlspecialchars($day) . "</strong>: $displayTime</li>";
+                                                }
+                                                echo "</ul>";
+                                            } else {
+                                                echo "No availability data";
+                                            }
+                                            ?>
+                                        </td>
                                         <td>
                                             <a href="edit_doctor.php?id=<?= $doctor['id']; ?>" class="btn btn-sm btn-warning">
                                                 <i class="bi bi-pencil"></i> Edit
                                             </a>
-                                            <a href="delete_doctor.php?id=<?= $doctor['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this doctor?');">
+                                            <button
+                                                class="btn btn-sm btn-danger delete-doctor-btn"
+                                                data-id="<?= $doctor['id']; ?>"
+                                                data-name="<?= htmlspecialchars($doctor['full_name']); ?>">
                                                 <i class="bi bi-trash"></i> Delete
-                                            </a>
+                                            </button>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -118,7 +139,66 @@ $doctors = $result->fetch_all(MYSQLI_ASSOC);
         </div>
     </footer>
 
+    <!-- Delete Doctor Confirmation Modal -->
+    <div class="modal fade" id="deleteDoctorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Doctor</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete Dr. <span id="doctorName" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteDoctorBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Logout</h5>
+                    <div class="mb-4">Are you sure you want to logout?</div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Logout confirmation logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const logoutBtn = document.querySelector('a[href="admin_logout.php"].btn-outline-light');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+                    modal.show();
+                });
+            }
+
+            // Delete doctor modal logic
+            document.querySelectorAll('.delete-doctor-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var doctorId = this.getAttribute('data-id');
+                    var doctorName = this.getAttribute('data-name');
+                    document.getElementById('doctorName').textContent = doctorName;
+                    document.getElementById('confirmDeleteDoctorBtn').setAttribute('href', 'delete_doctor.php?id=' + doctorId);
+                    var modal = new bootstrap.Modal(document.getElementById('deleteDoctorModal'));
+                    modal.show();
+                });
+            });
+        });
+    </script>
 </body>
 </html>

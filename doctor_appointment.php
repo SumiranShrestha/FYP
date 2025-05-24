@@ -178,134 +178,207 @@ if (!empty($appointment['prescription'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Appointment Details</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Appointment Details | Shady Shades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #dc3545;
+        }
+        .card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            border-bottom: none;
+        }
+        .prescription-card {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+        }
+        .btn {
+            border-radius: 8px;
+            padding: 8px 20px;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+    </style>
 </head>
 <body>
-  <?php require_once __DIR__ . '/header.php'; ?>
+    <?php require_once __DIR__ . '/header.php'; ?>
 
-  <div class="container mt-5">
-    <?php if (isset($_SESSION['alert_message'])): ?>
-      <div class="alert alert-<?= $_SESSION['alert_type'] ?> alert-dismissible fade show" role="alert">
-        <?= $_SESSION['alert_message'] ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      <?php unset($_SESSION['alert_message'], $_SESSION['alert_type']); ?>
-    <?php endif; ?>
-    <h2 class="mb-4">Appointment Details</h2>
+    <div class="container my-5">
+        <?php if (isset($_SESSION['alert_message'])): ?>
+            <div class="alert alert-<?= $_SESSION['alert_type'] ?> alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                <?= $_SESSION['alert_message'] ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php unset($_SESSION['alert_message'], $_SESSION['alert_type']); ?>
+        <?php endif; ?>
 
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <div class="card h-100">
-          <div class="card-header bg-primary text-white">
-            Patient Information
-          </div>
-          <div class="card-body">
-            <div class="d-flex flex-wrap align-items-center gap-3">
-              <span><strong>Name:</strong> <?= htmlspecialchars($appointment['patient_name']) ?></span>
-              <span><strong>Email:</strong> <?= htmlspecialchars($appointment['patient_email']) ?></span>
-              <span><strong>Phone:</strong> <?= htmlspecialchars($appointment['patient_phone']) ?></span>
-            </div>
-          </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-calendar2-check me-2"></i>Appointment Details</h2>
+            <a href="doctor_appointments.php" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Appointments
+            </a>
         </div>
-      </div>
-      <div class="col-md-6 mt-4 mt-md-0">
-        <div class="card h-100">
-          <div class="card-header bg-secondary text-white">
-            Appointment Details
-          </div>
-          <div class="card-body">
-            <div class="d-flex flex-column gap-2">
-              <span><strong>Date & Time:</strong> <?= date('M j, Y h:i A', strtotime($appointment['appointment_date'])) ?></span>
-              <span><strong>Status:</strong>
-                <?php
-                  switch ($appointment['status']) {
-                    case 'pending':    $badge = 'warning'; break;
-                    case 'confirmed':  $badge = 'success'; break;
-                    case 'completed':  $badge = 'info';    break;
-                    default:           $badge = 'secondary';
-                  }
-                ?>
-                <span class="badge bg-<?= $badge ?>">
-                  <?= ucfirst($appointment['status']) ?>
-                </span>
-              </span>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h5 class="card-title mb-0"><i class="bi bi-person-circle me-2"></i>Patient Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <i class="bi bi-person me-2"></i>
+                                <strong>Name:</strong> <?= htmlspecialchars($appointment['patient_name']) ?>
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-envelope me-2"></i>
+                                <strong>Email:</strong> <?= htmlspecialchars($appointment['patient_email']) ?>
+                            </li>
+                            <li>
+                                <i class="bi bi-telephone me-2"></i>
+                                <strong>Phone:</strong> <?= htmlspecialchars($appointment['patient_phone']) ?>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-secondary text-white py-3">
+                        <h5 class="card-title mb-0"><i class="bi bi-calendar2-week me-2"></i>Appointment Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <i class="bi bi-clock me-2"></i>
+                                <strong>Date & Time:</strong> 
+                                <?= date('F j, Y h:i A', strtotime($appointment['appointment_date'])) ?>
+                            </li>
+                            <li>
+                                <i class="bi bi-journal-check me-2"></i>
+                                <strong>Status:</strong>
+                                <?php
+                                    $badgeClass = match($appointment['status']) {
+                                        'pending' => 'warning',
+                                        'confirmed' => 'success',
+                                        'completed' => 'info',
+                                        'cancelled' => 'danger',
+                                        default => 'secondary'
+                                    };
+                                ?>
+                                <span class="badge bg-<?= $badgeClass ?> status-badge">
+                                    <?= ucfirst($appointment['status']) ?>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <form method="POST" action="" class="card shadow-sm">
+            <div class="card-body">
+                <input type="hidden" name="appointment_id" value="<?= $appointment['id'] ?>">
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label for="status" class="form-label fw-bold">
+                            <i class="bi bi-toggle2-on me-2"></i>Update Status
+                        </label>
+                        <select id="status" name="status" class="form-select">
+                            <?php foreach (['pending','confirmed','completed','cancelled'] as $s): ?>
+                                <option value="<?= $s ?>" <?= $appointment['status'] === $s ? 'selected' : '' ?>>
+                                    <?= ucfirst($s) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="prescription-card mb-4">
+                    <h5 class="mb-4"><i class="bi bi-file-medical me-2"></i>Prescription Details</h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Right Eye</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Sphere (SPH)</label>
+                                            <input type="text" name="right_eye_sphere" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_sphere']) ?>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Cylinder (CYL)</label>
+                                            <input type="text" name="right_eye_cylinder" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_cylinder']) ?>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Axis</label>
+                                            <input type="text" name="right_eye_axis" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_axis']) ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-eye me-2"></i>Left Eye</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Sphere (SPH)</label>
+                                            <input type="text" name="left_eye_sphere" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_sphere']) ?>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Cylinder (CYL)</label>
+                                            <input type="text" name="left_eye_cylinder" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_cylinder']) ?>">
+                                        </div>
+                                        <div class="col">
+                                            <label class="form-label" style="font-size:0.9rem;">Axis</label>
+                                            <input type="text" name="left_eye_axis" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_axis']) ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <?php if (!empty($appointment['prescription'])): ?>
-      <div class="card mb-4">
-        <div class="card-header bg-success text-white">
-          Prescription
-        </div>
-        <div class="card-body">
-          <?= nl2br(htmlspecialchars($appointment['prescription'])) ?>
-        </div>
-      </div>
-    <?php endif; ?>
-
-    <form method="POST" action="">
-      <input type="hidden" name="appointment_id" value="<?= $appointment['id'] ?>">
-
-      <div class="mb-3">
-        <label for="status" class="form-label">Update Status</label>
-        <select id="status" name="status" class="form-select form-select-sm" style="max-width: 630px;">
-          <?php foreach (['pending','confirmed','completed','cancelled'] as $s): ?>
-            <option value="<?= $s ?>" <?= $appointment['status'] === $s ? 'selected' : '' ?>>
-              <?= ucfirst($s) ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      
-      <div class="mb-3">
-        <label class="form-label">Prescription</label>
-        <div class="card p-2" style="max-width: 630px;">
-          <h6 class="mb-2" style="font-size:1rem;">Right Eye</h6>
-          <div class="row mb-2">
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Sphere (SPH)</label>
-              <input type="text" name="right_eye_sphere" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_sphere']) ?>">
-            </div>
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Cylinder (CYL)</label>
-              <input type="text" name="right_eye_cylinder" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_cylinder']) ?>">
-            </div>
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Axis</label>
-              <input type="text" name="right_eye_axis" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['right_eye_axis']) ?>">
-            </div>
-          </div>
-          <h6 class="mb-2" style="font-size:1rem;">Left Eye</h6>
-          <div class="row">
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Sphere (SPH)</label>
-              <input type="text" name="left_eye_sphere" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_sphere']) ?>">
-            </div>
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Cylinder (CYL)</label>
-              <input type="text" name="left_eye_cylinder" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_cylinder']) ?>">
-            </div>
-            <div class="col">
-              <label class="form-label" style="font-size:0.9rem;">Axis</label>
-              <input type="text" name="left_eye_axis" class="form-control form-control-sm" value="<?= htmlspecialchars($prescription_fields['left_eye_axis']) ?>">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary">Save Changes</button>
-      <a href="doctor_appointments.php" class="btn btn-secondary">← Back</a>
-    </form>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php require_once __DIR__ . '/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php require_once __DIR__ . '/footer.php'; ?>

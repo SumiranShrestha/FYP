@@ -97,6 +97,7 @@ $result = $conn->query("
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     LEFT JOIN brands b ON p.brand_id = b.id
+    WHERE p.prescription_required = 0
     ORDER BY p.id DESC
 ");
 ?>

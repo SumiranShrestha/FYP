@@ -25,32 +25,15 @@ if (!empty($selected_brands) && !in_array('all', $selected_brands)) {
     $query .= " AND products.brand_id IN (" . implode(',', array_map('intval', $selected_brands)) . ")";
 }
 
-// Since facial_structure column doesn't exist, we'll filter based on product name/description
+// Use facial_structure column for face shape filtering
 if (!empty($selected_face_shapes) && !in_array('all', $selected_face_shapes)) {
     $face_shape_conditions = [];
-
-    // Define which face shapes match which product characteristics
-    $face_shape_mappings = [
-        'round' => ['round', 'circle', 'circular'],
-        'oval' => ['oval', 'ellipse'],
-        'square' => ['square', 'angular', 'rectangular'],
-        'heart' => ['heart', 'cat-eye', 'aviator'],
-        'diamond' => ['diamond', 'geometric'],
-        'triangle' => ['triangle', 'wayfarer']
-    ];
-
     foreach ($selected_face_shapes as $face_shape) {
-        if ($face_shape != 'all' && isset($face_shape_mappings[$face_shape])) {
-            $terms = $face_shape_mappings[$face_shape];
-            $term_conditions = [];
-            foreach ($terms as $term) {
-                $term = mysqli_real_escape_string($conn, $term);
-                $term_conditions[] = "(products.name LIKE '%$term%' OR products.description LIKE '%$term%')";
-            }
-            $face_shape_conditions[] = "(" . implode(' OR ', $term_conditions) . ")";
+        if ($face_shape != 'all') {
+            $face_shape = mysqli_real_escape_string($conn, $face_shape);
+            $face_shape_conditions[] = "products.facial_structure = '$face_shape'";
         }
     }
-
     if (!empty($face_shape_conditions)) {
         $query .= " AND (" . implode(' OR ', $face_shape_conditions) . ")";
     }
@@ -269,29 +252,10 @@ $total_products = mysqli_num_rows($result);
                             }
                         }
 
-                        // Determine face shape for display (based on product name/description)
+                        // Display face shape from database
                         $face_shape_display = '';
-                        $face_shape_mappings = [
-                            'round' => ['round', 'circle', 'circular'],
-                            'oval' => ['oval', 'ellipse'],
-                            'square' => ['square', 'angular', 'rectangular'],
-                            'heart' => ['heart', 'cat-eye', 'aviator'],
-                            'diamond' => ['diamond', 'geometric'],
-                            'triangle' => ['triangle', 'wayfarer']
-                        ];
-
-                        $matched_shapes = [];
-                        foreach ($face_shape_mappings as $shape => $terms) {
-                            foreach ($terms as $term) {
-                                if (stripos($product['name'] . ' ' . $product['description'], $term) !== false) {
-                                    $matched_shapes[] = $shape;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!empty($matched_shapes)) {
-                            $face_shape_display = 'Best for ' . ucfirst(implode('/', array_unique($matched_shapes))) . ' Faces';
+                        if (!empty($product['facial_structure']) && $product['facial_structure'] !== 'all') {
+                            $face_shape_display = 'Best for ' . ucfirst($product['facial_structure']) . ' Faces';
                         }
                     ?>
                         <div class="col">
@@ -308,7 +272,11 @@ $total_products = mysqli_num_rows($result);
                                     <div class="mb-2">
                                         <span class="badge save-badge-custom">SAVE <?= number_format($product['price'] - $product['discount_price']) ?></span>
                                     </div>
-                                 
+                                    <?php if ($face_shape_display): ?>
+                                        <div class="mb-2">
+                                            <span class="badge bg-info"><?= $face_shape_display ?></span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

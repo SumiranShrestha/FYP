@@ -101,6 +101,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
     // Merge existing and new images
     $updated_images = array_merge($existing_images, $uploaded_images);
 
+    // Prevent update if there are no images
+    if (empty($updated_images)) {
+        $_SESSION['alert_message'] = "At least one product image is required to update the product.";
+        $_SESSION['alert_type'] = "danger";
+        header("Location: edit_product.php?id=$product_id");
+        exit();
+    }
+
     // Update the product in the database
     $stmt = $conn->prepare("UPDATE products SET 
                             name = ?, 
@@ -346,7 +354,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_product"])) {
                     </div>
 
                     <div class="mb-3">
-                        <label for="images" class="form-label">Add More Images</label>
+                        <label for="images" class="form-label">Add More Images<span class="required-asterisk">*</span></label>
                         <input type="file" class="form-control" id="images" name="images[]" multiple accept="image/*">
                     </div>
 

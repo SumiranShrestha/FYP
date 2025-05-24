@@ -32,6 +32,18 @@ if ($result->num_rows === 0) {
 
 $order = $result->fetch_assoc();
 
+// If prescription order, fetch prescription details
+$prescription = null;
+if (!empty($order['prescription_id'])) {
+    $stmt = $conn->prepare("SELECT * FROM prescription_frames WHERE id = ?");
+    $stmt->bind_param("i", $order['prescription_id']);
+    $stmt->execute();
+    $presc_result = $stmt->get_result();
+    if ($presc_result->num_rows > 0) {
+        $prescription = $presc_result->fetch_assoc();
+    }
+}
+
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $new_status = $_POST['status'];
@@ -131,11 +143,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                                     echo '<span class="badge bg-danger">Cancelled</span>';
                                     break;
                                 default:
-                                    echo '<span class="badge bg-secondary">Unknown</span>';
+                                    echo '<span class="badge bg-secondary">Pending</span>';
                             }
                             ?>
                         </p>
                         <p><strong>Total Price:</strong> रू <?= number_format($order['total_price'], 2); ?></p>
+                        <?php if ($prescription): ?>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <strong>This is a prescription order.</strong>
+                            </div>
+                        <?php endif; ?>
                     </div>
                     <div class="col-md-6">
                         <h6>Customer Information</h6>
@@ -145,6 +162,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <p><strong>Address:</strong> <?= nl2br(htmlspecialchars($order['address'])); ?></p>
                     </div>
                 </div>
+
+                <?php if ($prescription): ?>
+                <hr>
+                <h6 class="mt-4 mb-2 text-primary">Prescription Details</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Right Eye (SPH/CYL/Axis):</strong><br>
+                        <?= htmlspecialchars($prescription['right_eye_sphere']) ?> /
+                        <?= htmlspecialchars($prescription['right_eye_cylinder']) ?> /
+                        <?= htmlspecialchars($prescription['right_eye_axis']) ?>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Left Eye (SPH/CYL/Axis):</strong><br>
+                        <?= htmlspecialchars($prescription['left_eye_sphere']) ?> /
+                        <?= htmlspecialchars($prescription['left_eye_cylinder']) ?> /
+                        <?= htmlspecialchars($prescription['left_eye_axis']) ?>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Status Update Form -->
                 <form method="POST" action="view_order.php?id=<?= $order['id']; ?>" class="mt-4">

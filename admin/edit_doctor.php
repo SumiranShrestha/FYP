@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
     if ($stmt->execute()) {
         $_SESSION['alert_message'] = "Doctor updated successfully";
         $_SESSION['alert_type'] = "success";
-        header("Location: view_doctors.php");
+        header("Location: manage_doctors.php");
         exit();
     } else {
         $_SESSION['alert_message'] = "Failed to update doctor";
@@ -90,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
+
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
@@ -119,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
                         <a class="nav-link" href="manage_products.php">Products</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="view_doctors.php">Doctors</a>
+                        <a class="nav-link active" href="manage_doctors.php">Doctors</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
@@ -169,13 +171,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
                             <h6 class="card-subtitle mb-2 text-muted">Availability</h6>
                             <p>Select the days the doctor is available and enter the time.</p>
 
-                            <?php 
+                            <?php
                             $availability = json_decode($doctor['availability'] ?? '{}', true) ?? [];
-                            $daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                            $daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             ?>
-                            
+
                             <!-- Checkboxes for days of the week -->
-                            <?php foreach ($daysOfWeek as $day): 
+                            <?php foreach ($daysOfWeek as $day):
                                 $isAvailable = isset($availability[$day]) ? 'checked' : '';
                                 $timeArr = $availability[$day] ?? [];
                                 $timeValue = is_array($timeArr) ? implode(', ', $timeArr) : $timeArr;
@@ -240,15 +242,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
         }
 
         // Initialize the availability time input based on initial checkbox state
-        document.addEventListener('DOMContentLoaded', function () {
-            const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        document.addEventListener('DOMContentLoaded', function() {
+            const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             daysOfWeek.forEach(day => {
                 toggleTimeInput(day); // Initialize each checkbox time input
             });
         });
 
         // Logout confirmation logic
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
                 e.preventDefault();
                 var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
@@ -257,4 +259,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_doctor'])) {
         });
     </script>
 </body>
+
 </html>

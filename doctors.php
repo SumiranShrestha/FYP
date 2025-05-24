@@ -63,43 +63,70 @@ $conn->close();
             </div>
         <?php else: ?>
             <div class="row">
-                <?php foreach ($doctors as $doctor): 
-                    // Initialize availability data
-                    $availability_display = "Not available";
-                    $availability_details = [];
+                <?php 
+                // Filter only available doctors
+                $available_doctors = [];
+                foreach ($doctors as $doctor) {
                     $is_available = false;
-                    
-                    // Process availability data
                     if (!empty($doctor['availability'])) {
-                        // Clean and decode JSON
                         $cleaned = stripslashes(trim($doctor['availability'], '"'));
                         $availability_data = json_decode($cleaned, true);
-                        
                         if (json_last_error() === JSON_ERROR_NONE && is_array($availability_data)) {
                             foreach ($availability_data as $day => $times) {
-                                if (is_array($times)) {
-                                    $time_slots = $times;
-                                } else {
-                                    // Handle comma-separated times
-                                    $time_slots = explode(',', $times);
-                                    $time_slots = array_map('trim', $time_slots);
-                                }
-                                
+                                $time_slots = is_array($times) ? $times : array_map('trim', explode(',', $times));
                                 if (!empty($time_slots)) {
                                     $is_available = true;
-                                    $availability_details[$day] = $time_slots;
+                                    break;
                                 }
                             }
                         }
                     }
-                    
-                    // Prepare display text
                     if ($is_available) {
-                        $availability_display = "Available";
-                        // Get first available day for the badge
-                        $first_day = array_key_first($availability_details);
-                        $first_times = implode(", ", $availability_details[$first_day]);
+                        $available_doctors[] = $doctor;
                     }
+                }
+                if (empty($available_doctors)): ?>
+                    <div class="alert alert-warning text-center">
+                        No doctors available at the moment.
+                    </div>
+                <?php else: 
+                    foreach ($available_doctors as $doctor): 
+                        // Initialize availability data
+                        $availability_display = "Not available";
+                        $availability_details = [];
+                        $is_available = false;
+                        
+                        // Process availability data
+                        if (!empty($doctor['availability'])) {
+                            // Clean and decode JSON
+                            $cleaned = stripslashes(trim($doctor['availability'], '"'));
+                            $availability_data = json_decode($cleaned, true);
+                            
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($availability_data)) {
+                                foreach ($availability_data as $day => $times) {
+                                    if (is_array($times)) {
+                                        $time_slots = $times;
+                                    } else {
+                                        // Handle comma-separated times
+                                        $time_slots = explode(',', $times);
+                                        $time_slots = array_map('trim', $time_slots);
+                                    }
+                                    
+                                    if (!empty($time_slots)) {
+                                        $is_available = true;
+                                        $availability_details[$day] = $time_slots;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Prepare display text
+                        if ($is_available) {
+                            $availability_display = "Available";
+                            // Get first available day for the badge
+                            $first_day = array_key_first($availability_details);
+                            $first_times = implode(", ", $availability_details[$first_day]);
+                        }
                 ?>
                     <div class="col-md-4 mb-4">
                         <div class="card doctor-card h-100">
@@ -156,7 +183,10 @@ $conn->close();
                             </div>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                <?php 
+                    endforeach; 
+                endif; 
+                ?>
             </div>
         <?php endif; ?>
     </div>

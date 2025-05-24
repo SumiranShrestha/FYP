@@ -18,6 +18,8 @@ if (isset($_POST['add_faq'])) {
     } else {
         $_SESSION['error_message'] = 'Failed to add FAQ. Please try again.';
     }
+    header("Location: manage_faqs.php");
+    exit();
 }
 
 // Handle deleting a FAQ
@@ -29,6 +31,8 @@ if (isset($_GET['delete_id'])) {
     } else {
         $_SESSION['error_message'] = 'Failed to delete FAQ. Please try again.';
     }
+    header("Location: manage_faqs.php");
+    exit();
 }
 
 // Fetch all FAQs
@@ -132,9 +136,12 @@ $faqs = mysqli_query($conn, $sql);
                             <a href="edit_faqs.php?id=<?php echo $faq['id']; ?>" class="btn btn-warning btn-sm">
                                 <i class="bi bi-pencil me-1"></i>Edit
                             </a>
-                            <a href="manage_faqs.php?delete_id=<?php echo $faq['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this FAQ?');">
+                            <button
+                                class="btn btn-danger btn-sm delete-faq-btn"
+                                data-id="<?php echo $faq['id']; ?>"
+                                data-question="<?php echo htmlspecialchars($faq['question']); ?>">
                                 <i class="bi bi-trash me-1"></i>Delete
-                            </a>
+                            </button>
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -149,7 +156,49 @@ $faqs = mysqli_query($conn, $sql);
         </div>
     </footer>
 
+    <!-- Delete FAQ Confirmation Modal -->
+    <div class="modal fade" id="deleteFaqModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete FAQ</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete the FAQ: <span id="faqQuestion" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <a href="#" id="confirmDeleteFaqBtn" class="btn btn-primary px-4">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Delete FAQ modal logic
+        document.querySelectorAll('.delete-faq-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var faqId = this.getAttribute('data-id');
+                var faqQuestion = this.getAttribute('data-question');
+                document.getElementById('faqQuestion').textContent = faqQuestion;
+                document.getElementById('confirmDeleteFaqBtn').setAttribute('href', 'manage_faqs.php?delete_id=' + faqId);
+                var modal = new bootstrap.Modal(document.getElementById('deleteFaqModal'));
+                modal.show();
+            });
+        });
+
+        // Auto-hide alert messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                setTimeout(function() {
+                    var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    bsAlert.close();
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 </html>

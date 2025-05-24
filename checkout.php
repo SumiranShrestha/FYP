@@ -27,11 +27,12 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// Fetch cart items and calculate totals
+// Fetch cart items and calculate totals (ALWAYS fetch fresh from DB)
 $cart_items      = [];
 $total_price     = 0;
 $delivery_charge = 100;
 
+// Refetch cart items on every page load to ensure latest data
 $stmt = $conn->prepare("
     SELECT c.*, p.name, p.price, p.discount_price, p.images
     FROM cart c
@@ -47,6 +48,77 @@ while ($row = $result->fetch_assoc()) {
     $total_price += $unit_price * $row['quantity'];
 }
 $stmt->close();
+
+// If cart is empty, check for product_id in URL and add to cart
+if (empty($cart_items) && isset($_GET['product_id'])) {
+    $product_id = intval($_GET['product_id']);
+    $prescription_id = isset($_GET['prescription_id']) ? intval($_GET['prescription_id']) : null;
+
+    // Check if product exists and get prescription_required
+    $stmt = $conn->prepare("SELECT id, prescription_required FROM products WHERE id = ?");
+    $stmt->bind_param("i", $product_id);
+    $stmt->execute();
+    $product_row = $stmt->get_result()->fetch_assoc();
+    $product_exists = $product_row ? true : false;
+    $prescription_required = $product_row['prescription_required'] ?? 0;
+    $stmt->close();
+
+    if ($product_exists) {
+        // Add to cart (if not already in cart, increase quantity)
+        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+        $stmt->bind_param("ii", $user_id, $product_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($row = $result->fetch_assoc()) {
+            $cart_id = $row['id'];
+            $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1 WHERE id = ?");
+            $stmt->bind_param("i", $cart_id);
+            $stmt->execute();
+        } else {
+            // If prescription frame and prescription_id is provided, add prescription_id to cart
+            if ($prescription_required == 1 && $prescription_id) {
+                $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
+                $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
+            } else {
+                $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, 1)");
+                $stmt->bind_param("ii", $user_id, $product_id);
+            }
+            $stmt->execute();
+            $cart_id = $conn->insert_id;
+        }
+
+        // If prescription frame, add to prescription_orders with prescription_id if available
+        if ($prescription_required == 1) {
+            if ($prescription_id) {
+                $stmt = $conn->prepare("INSERT INTO prescription_orders (user_id, product_id, prescription_id, order_type, status) VALUES (?, ?, ?, 'with_prescription', 'draft')");
+                $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
+            } else {
+                $stmt = $conn->prepare("INSERT INTO prescription_orders (user_id, product_id, order_type, status) VALUES (?, ?, 'with_prescription', 'draft')");
+                $stmt->bind_param("ii", $user_id, $product_id);
+            }
+            $stmt->execute();
+        }
+
+        // Refetch cart items after adding
+        $cart_items = [];
+        $total_price = 0;
+        $stmt = $conn->prepare("
+            SELECT c.*, p.name, p.price, p.discount_price, p.images
+            FROM cart c
+            JOIN products p ON c.product_id = p.id
+            WHERE c.user_id = ?
+        ");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $cart_items[] = $row;
+            $unit_price   = $row['discount_price'] > 0 ? $row['discount_price'] : $row['price'];
+            $total_price += $unit_price * $row['quantity'];
+        }
+        $stmt->close();
+    }
+}
 
 $grand_total = $total_price + $delivery_charge;
 
@@ -472,7 +544,7 @@ $purchase_order_name = 'Shady Shades Order';
             <span><?= htmlspecialchars($_POST['order_note']) ?></span>
           </div>
         <?php endif; ?>
-        <?php if (empty($cart_items)): ?>
+        <?php if (empty($cart_items) && !isset($_GET['order_id']) && !isset($_GET['pidx'])): ?>
           <div class="alert alert-warning mb-2">
             Your cart is empty. Please add items to your cart before placing an order.
           </div>

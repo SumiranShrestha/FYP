@@ -1,55 +1,118 @@
 <?php
 session_start();
-include('server/connection.php');
+include("server/connection.php");
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    echo json_encode(["status" => "error", "message" => "User not logged in"]);
+    header("Location: login.php");
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
-$full_name = $_POST['inputName'] ?? '';
-$phone = $_POST['inputPhone'] ?? '';
-$city = $_POST['inputCity'] ?? '';
-$address = $_POST['inputAddress'] ?? '';
-$payment_method = $_POST['payment_method'] ?? '';
-$order_note = $_POST['order_note'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user_id = $_SESSION['user_id'];
 
-// Get the user's email from the users table
-$user_stmt = $conn->prepare("SELECT user_email FROM users WHERE id = ?");
-$user_stmt->bind_param("i", $user_id);
-$user_stmt->execute();
-$user_result = $user_stmt->get_result();
-$user = $user_result->fetch_assoc();
+    // Get form data (only for COD orders)
+    $full_name = trim($_POST['inputName'] ?? '');
+    $email = trim($_POST['inputEmail'] ?? '');
+    $phone = trim($_POST['inputPhone'] ?? '');
+    $address = trim($_POST['inputAddress'] ?? '');
+    $city = trim($_POST['inputCity'] ?? '');
+    $payment_method = $_POST['payment_method'] ?? 'cod';
+    $order_note = trim($_POST['order_note'] ?? '');
 
-if (!$user) {
-    echo json_encode(["status" => "error", "message" => "User not found"]);
-    exit();
-}
+    // Validate required fields
+    if (empty($full_name) || empty($phone) || empty($address) || empty($city)) {
+        header("Location: checkout.php?error=missing_fields");
+        exit();
+    }
 
-$email = $user['user_email']; // Get email from users table
+    // Get cart items with prescription info
+    $stmt = $conn->prepare("
+        SELECT c.*, p.name, p.price, p.discount_price, p.prescription_required
+        FROM cart c
+        JOIN products p ON c.product_id = p.id
+        WHERE c.user_id = ?
+    ");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $cart_items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// Calculate grand total (you'll need to implement this based on your cart)
-$total_price = $_POST['inputAmount4'] ?? 0; // Use the value sent from the form
+    if (empty($cart_items)) {
+        header("Location: cart.php?error=empty_cart");
+        exit();
+    }
 
-// Validate total_price
-$total_price = floatval($total_price);
+    // Calculate total
+    $total_price = 0;
+    $delivery_charge = 100;
+    foreach ($cart_items as $item) {
+        $unit_price = $item['discount_price'] > 0 ? $item['discount_price'] : $item['price'];
+        $total_price += $unit_price * $item['quantity'];
+    }
+    $grand_total = $total_price + $delivery_charge;
 
-// Insert order into the database (using correct column names)
-$stmt = $conn->prepare("INSERT INTO orders (user_id, full_name, email, phone, address, city, payment_method, total_price, order_note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("issssssds", $user_id, $full_name, $email, $phone, $address, $city, $payment_method, $total_price, $order_note);
+    // Get prescription_id from the first prescription item (if any)
+    $prescription_id = null;
+    foreach ($cart_items as $item) {
+        if (!empty($item['prescription_id'])) {
+            $prescription_id = $item['prescription_id'];
+            break;
+        }
+    }
 
-if ($stmt->execute()) {
-    $order_id = $stmt->insert_id;
+    // Start transaction
+    $conn->begin_transaction();
 
-    // Remove session flag so user can order again
-    unset($_SESSION['order_placed'], $_SESSION['last_order_id']);
+    try {
+        // Create order
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, full_name, email, phone, address, city, payment_method, total_price, prescription_id, order_note, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
+        $stmt->bind_param("issssssdis", $user_id, $full_name, $email, $phone, $address, $city, $payment_method, $grand_total, $prescription_id, $order_note);
+        $stmt->execute();
+        $order_id = $conn->insert_id;
 
-    // Redirect to the order confirmation page with the order ID
-    header("Location: order-confirmation.php?order_id=" . $order_id);
-    exit(); // Ensure no further code execution after the redirect
+        // Add order items
+        foreach ($cart_items as $item) {
+            $unit_price = $item['discount_price'] > 0 ? $item['discount_price'] : $item['price'];
+            $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_id, quantity, price, payment_method) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("iiisd", $order_id, $item['product_id'], $item['quantity'], $unit_price, $payment_method);
+            $stmt->execute();
+
+            // If this is a prescription product, add to prescription_orders
+            if ($item['prescription_required'] == 1 && !empty($item['prescription_id'])) {
+                // Check if already exists to avoid duplicates
+                $checkStmt = $conn->prepare("SELECT id FROM prescription_orders WHERE user_id = ? AND product_id = ? AND prescription_id = ?");
+                $checkStmt->bind_param("iii", $user_id, $item['product_id'], $item['prescription_id']);
+                $checkStmt->execute();
+                $exists = $checkStmt->get_result()->num_rows > 0;
+                $checkStmt->close();
+
+                if (!$exists) {
+                    $stmt = $conn->prepare("INSERT INTO prescription_orders (user_id, product_id, prescription_id, order_type, status) VALUES (?, ?, ?, 'with_prescription', 'submitted')");
+                    $stmt->bind_param("iii", $user_id, $item['product_id'], $item['prescription_id']);
+                    $stmt->execute();
+                }
+            }
+        }
+
+        // Clear cart
+        $stmt = $conn->prepare("DELETE FROM cart WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+
+        // Store user info in session for email
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_name'] = $full_name;
+
+        $conn->commit();
+
+        header("Location: order-confirmation.php?order_id=" . $order_id);
+        exit();
+    } catch (Exception $e) {
+        $conn->rollback();
+        error_log("COD order creation error: " . $e->getMessage());
+        header("Location: checkout.php?error=order_failed");
+        exit();
+    }
 } else {
-    echo json_encode(["status" => "error", "message" => "Failed to place order: " . $conn->error]);
+    header("Location: checkout.php");
+    exit();
 }
-?>

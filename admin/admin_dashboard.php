@@ -135,29 +135,15 @@ if (!isset($_SESSION["admin_logged_in"])) {
                 </div>
             </div>
 
-            <!-- Add Doctor Card -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="bi bi-person-plus text-primary" style="font-size: 3rem;"></i>
-                        <h5 class="card-title mt-3">Add Doctor</h5>
-                        <p class="card-text">Add new doctors to the system with their details and availability.</p>
-                        <a href="add_doctor.php" class="btn btn-primary">
-                            <i class="bi bi-person-plus me-1"></i>Add Doctor
-                        </a>
-                    </div>
-                </div>
-            </div>
-
             <!-- View Doctors Card -->
             <div class="col-md-6 col-lg-4">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
                         <i class="bi bi-person-lines-fill text-primary" style="font-size: 3rem;"></i>
-                        <h5 class="card-title mt-3">View Doctors</h5>
+                        <h5 class="card-title mt-3">Manage Doctors</h5>
                         <p class="card-text">View and manage all doctors in the system.</p>
-                        <a href="view_doctors.php" class="btn btn-primary">
-                            <i class="bi bi-person-lines-fill me-1"></i>View Doctors
+                        <a href="manage_doctors.php" class="btn btn-primary">
+                            <i class="bi bi-person-lines-fill me-1"></i>Manage Doctors
                         </a>
                     </div>
                 </div>

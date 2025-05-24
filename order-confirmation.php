@@ -2,7 +2,6 @@
 session_start();
 include('header.php');
 
-// Add PHPMailer use statements at the top
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -13,12 +12,10 @@ if (!isset($_GET['order_id'])) {
 
 $order_id = $_GET['order_id'];
 
-// Always send order confirmation email when this page is loaded with order_id
 // Fetch user email and name from session or database
 $user_email = isset($_SESSION['user_email']) ? $_SESSION['user_email'] : '';
 $user_name = isset($_SESSION['user_name']) ? $_SESSION['user_name'] : '';
 
-// If not in session, fetch from database
 if (empty($user_email) || empty($user_name)) {
     include("server/connection.php");
     $stmt = $conn->prepare("SELECT u.user_email, u.user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?");
@@ -32,8 +29,8 @@ if (empty($user_email) || empty($user_name)) {
     }
 }
 
+// Send email confirmation
 if (!empty($user_email) && !empty($user_name)) {
-    // PHPMailer
     require_once 'PHPMailer-master/src/PHPMailer.php';
     require_once 'PHPMailer-master/src/SMTP.php';
     require_once 'PHPMailer-master/src/Exception.php';
@@ -65,13 +62,14 @@ if (!empty($user_email) && !empty($user_name)) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmation | Shady Shades</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
+
 <body>
     <div class="container mt-5">
         <div class="card shadow-sm">
@@ -84,4 +82,5 @@ if (!empty($user_email) && !empty($user_name)) {
         </div>
     </div>
 </body>
+
 </html>

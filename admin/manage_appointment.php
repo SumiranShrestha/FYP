@@ -201,12 +201,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Appointment Date & Time -->
             <div class="mb-3">
                 <label for="appointment_date" class="form-label">Appointment Date & Time</label>
-                <input type="datetime-local" name="appointment_date" id="appointment_date" class="form-control" value="<?php echo htmlspecialchars($datetime_local); ?>" required <?php if($disable_status_change) echo 'disabled'; ?>>
+                <input type="datetime-local" name="appointment_date" id="appointment_date" class="form-control" value="<?php echo htmlspecialchars($datetime_local); ?>" required>
             </div>
             <!-- Appointment Status -->
             <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
-                <select name="status" id="status" class="form-select" required <?php if($disable_status_change) echo 'disabled'; ?>>
+                <select name="status" id="status" class="form-select" required>
                     <?php 
                     $statuses = ['pending', 'confirmed', 'completed', 'cancelled'];
                     foreach ($statuses as $s): 
@@ -216,12 +216,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <?php if($disable_status_change): ?>
-                    <div class="form-text text-danger">Status cannot be changed when appointment is Confirmed or Completed.</div>
-                <?php endif; ?>
             </div>
             <!-- Form Actions -->
-            <button type="submit" class="btn btn-primary" <?php if($disable_status_change) echo 'disabled'; ?>>Update Appointment</button>
+            <button type="submit" class="btn btn-primary">Update Appointment</button>
             <a href="view_appointment.php" class="btn btn-secondary">Cancel</a>
         </form>
     </div>

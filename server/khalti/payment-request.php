@@ -1,5 +1,5 @@
 <?php
-// server/khalti-ePayment-gateway-main/payment-request.php
+// server/khalti/payment-request.php
 
 // Enable full error reporting
 ini_set('display_errors', 1);
@@ -17,102 +17,74 @@ $email               = filter_var($_POST['inputEmail'] ?? '', FILTER_SANITIZE_EM
 $phone               = preg_replace('/\D+/', '', $_POST['inputPhone'] ?? '');
 $city                = htmlspecialchars($_POST['inputCity'] ?? '');
 $address             = htmlspecialchars($_POST['inputAddress'] ?? '');
+$order_note          = htmlspecialchars($_POST['order_note'] ?? '');
+$landmark            = htmlspecialchars($_POST['landmark'] ?? '');
 
 // 2) Validate
 $errors = [];
-if ($amount_paisa < 100)                         $errors[] = 'Amount must be at least Rs 1';
+if ($amount_paisa < 100)                         $errors[] = 'Amount must be at least Rs 1';
 if (!$purchase_order_id)                         $errors[] = 'Order ID is required';
 if (trim($name) === '')                          $errors[] = 'Name is required';
 if (!filter_var($email, FILTER_VALIDATE_EMAIL))  $errors[] = 'Valid email is required';
 if (strlen($phone) !== 10)                       $errors[] = 'Valid 10‑digit phone is required';
+if (trim($city) === '')                          $errors[] = 'City is required';
+if (trim($address) === '')                       $errors[] = 'Address is required';
 
 if (!empty($errors)) {
-    echo "<h2>Validation Errors:</h2>\n<ul>\n";
-    foreach ($errors as $e) {
-        echo "<li>" . htmlspecialchars($e) . "</li>\n";
-    }
-    echo "</ul>";
-    exit;
+  echo "<h2>Validation Errors:</h2>\n<ul>\n";
+  foreach ($errors as $e) {
+    echo "<li>" . htmlspecialchars($e) . "</li>\n";
+  }
+  echo "</ul>";
+  echo '<a href="../../checkout.php">Go back to checkout</a>';
+  exit;
 }
 
-// 3) Insert order + items then clear cart
-$conn->begin_transaction();
-try {
-    // orders table
-    $o = $conn->prepare("
-      INSERT INTO orders
-        (user_id, full_name, email, phone, address, city, payment_method, total_price)
-      VALUES (?, ?, ?, ?, ?, ?, 'khalti', ?)
-    ");
-    $rupees = $amount_paisa / 100;
-    $o->bind_param("isssssd",
-      $_SESSION['user_id'], $name, $email, $phone, $address, $city, $rupees
-    );
-    $o->execute();
-    if ($o->error) {
-        throw new Exception("Orders insert error: " . $o->error);
-    }
-    $order_id = $conn->insert_id;
-    $o->close();
+// 3) Store checkout data in session for payment-response.php
+$_SESSION['checkout_data'] = [
+  'name' => $name,
+  'email' => $email,
+  'phone' => $phone,
+  'city' => $city,
+  'address' => $address,
+  'order_note' => $order_note,
+  'landmark' => $landmark,
+  'amount' => $amount_paisa / 100
+];
 
-    // order_items
-    $c = $conn->prepare("
-      SELECT c.product_id, c.quantity,
-             IF(p.discount_price>0, p.discount_price, p.price) AS unit_price
-      FROM cart c
-      JOIN products p ON c.product_id=p.id
-      WHERE c.user_id=?
-    ");
-    $c->bind_param("i", $_SESSION['user_id']);
-    $c->execute();
-    $cartRes = $c->get_result();
-    $c->close();
+// 4) Validate cart is not empty
+$stmt = $conn->prepare("
+    SELECT COUNT(*) as count
+    FROM cart c
+    JOIN products p ON c.product_id = p.id
+    WHERE c.user_id = ?
+");
+$stmt->bind_param("i", $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
-    $i = $conn->prepare("
-      INSERT INTO order_items (order_id, product_id, quantity, price)
-      VALUES (?, ?, ?, ?)
-    ");
-    while ($ci = $cartRes->fetch_assoc()) {
-        $i->bind_param("iiid",
-          $order_id,
-          $ci['product_id'],
-          $ci['quantity'],
-          $ci['unit_price']
-        );
-        $i->execute();
-        if ($i->error) {
-            throw new Exception("Order_items insert error: " . $i->error);
-        }
-    }
-    $i->close();
-
-    // clear cart
-    $d = $conn->prepare("DELETE FROM cart WHERE user_id=?");
-    $d->bind_param("i", $_SESSION['user_id']);
-    $d->execute();
-    if ($d->error) {
-        throw new Exception("Cart delete error: " . $d->error);
-    }
-    $d->close();
-
-    $conn->commit();
-} catch (Exception $e) {
-    $conn->rollback();
-    echo "<h2>Database Error:</h2>\n<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
-    exit;
+if ($result['count'] == 0) {
+  echo "<h2>Your cart is empty. Please add items before placing an order.</h2>";
+  echo '<a href="../../cart.php">Go to cart</a>';
+  exit;
 }
 
-// 4) Initiate Khalti
+// 5) Initiate Khalti payment
 $postFields = [
-  'return_url'          => (isset($_SERVER['HTTPS'])?'https://':'http://')
-                           .$_SERVER['HTTP_HOST']
-                           .'/server/khalti/payment-response.php',
-  'website_url'         => (isset($_SERVER['HTTPS'])?'https://':'http://')
-                           .$_SERVER['HTTP_HOST'].'/',
+  'return_url'          => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://')
+    . $_SERVER['HTTP_HOST']
+    . '/server/khalti/payment-response.php',
+  'website_url'         => (isset($_SERVER['HTTPS']) ? 'https://' : 'http://')
+    . $_SERVER['HTTP_HOST'] . '/',
   'amount'              => $amount_paisa,
   'purchase_order_id'   => $purchase_order_id,
   'purchase_order_name' => $purchase_order_name,
-  'customer_info'       => ['name'=>$name,'email'=>$email,'phone'=>$phone],
+  'customer_info'       => [
+    'name' => $name,
+    'email' => $email,
+    'phone' => $phone
+  ],
 ];
 
 $ch = curl_init('https://a.khalti.com/api/v2/epayment/initiate/');
@@ -134,22 +106,28 @@ $code     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($err) {
-    echo "<h2>cURL Error:</h2><pre>" . htmlspecialchars($err) . "</pre>";
-    exit;
+  echo "<h2>cURL Error:</h2><pre>" . htmlspecialchars($err) . "</pre>";
+  echo '<a href="../../checkout.php">Go back to checkout</a>';
+  exit;
 }
 if ($code !== 200) {
-    echo "<h2>HTTP Error Code: $code</h2>";
-    echo "<h3>Response body:</h3><pre>" . htmlspecialchars($response) . "</pre>";
-    exit;
+  echo "<h2>HTTP Error Code: $code</h2>";
+  echo "<h3>Response body:</h3><pre>" . htmlspecialchars($response) . "</pre>";
+  echo '<a href="../../checkout.php">Go back to checkout</a>';
+  exit;
 }
 
 $data = json_decode($response, true);
 if (!empty($data['payment_url'])) {
-    // redirect to Khalti
-    header("Location: " . $data['payment_url']);
-    exit;
+  // Store pidx for verification
+  $_SESSION['khalti_pidx'] = $data['pidx'] ?? null;
+
+  // Redirect to Khalti
+  header("Location: " . $data['payment_url']);
+  exit;
 }
 
-// fallback
+// Fallback
 echo "<h2>Unexpected response from Khalti:</h2><pre>" . htmlspecialchars($response) . "</pre>";
+echo '<a href="../../checkout.php">Go back to checkout</a>';
 exit;
