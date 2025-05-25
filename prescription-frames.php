@@ -18,6 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_prescription_i
         $stmt->bind_param("i", $delete_id);
         $stmt->execute();
 
+        // Set prescription_id to NULL in orders for this prescription
+        $stmt = $conn->prepare("UPDATE orders SET prescription_id = NULL WHERE prescription_id = ?");
+        $stmt->bind_param("i", $delete_id);
+        $stmt->execute();
+
+        // Set prescription_id to NULL in prescription_orders for this prescription
+        $stmt = $conn->prepare("UPDATE prescription_orders SET prescription_id = NULL WHERE prescription_id = ?");
+        $stmt->bind_param("i", $delete_id);
+        $stmt->execute();
+
         // Now, delete the prescription
         $stmt = $conn->prepare("DELETE FROM prescription_frames WHERE id = ? AND user_id = ?");
         $stmt->bind_param("ii", $delete_id, $user_id);
@@ -157,12 +167,6 @@ if (isset($_SESSION['user_id'])) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer bg-transparent border-top-0">
-                                    <a href="prescription_order.php?prescription_id=<?= $prescription['id'] ?>"
-                                        class="btn btn-outline-primary w-100">
-                                        <i class="bi bi-eye-fill me-2"></i>Use This Prescription
-                                    </a>
-                                </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -223,7 +227,7 @@ if (isset($_SESSION['user_id'])) {
                                         <?php foreach ($prescriptions as $prescription): ?>
                                             <li>
                                                 <a class="dropdown-item"
-                                                    href="prescription_order.php?product_id=<?= $product['id'] ?>&prescription_id=<?= $prescription['id'] ?>">
+                                                    href="customize_prescription.php?product_id=<?= $product['id'] ?>&prescription_id=<?= $prescription['id'] ?>">
                                                     <?= date('M d, Y', strtotime($prescription['created_at'])) ?>
                                                 </a>
                                             </li>

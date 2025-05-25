@@ -56,37 +56,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
 
     // If using a saved prescription
     if ($prescription_id) {
-        // Add to cart with prescription_id
-        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-        $stmt->bind_param("ii", $user_id, $product_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            // Update existing cart item with prescription
-            $cart_id = $row['id'];
-            $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
-            $stmt->bind_param("ii", $prescription_id, $cart_id);
+        if ($product_id) {
+            // Add to cart with prescription_id
+            $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+            $stmt->bind_param("ii", $user_id, $product_id);
             $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                // Update existing cart item with prescription
+                $cart_id = $row['id'];
+                $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
+                $stmt->bind_param("ii", $prescription_id, $cart_id);
+                $stmt->execute();
+            } else {
+                // Insert new cart item with prescription
+                $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
+                $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
+                $stmt->execute();
+            }
+            header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
+            exit();
         } else {
-            // Insert new cart item with prescription
-            $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
-            $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
-            $stmt->execute();
+            // No product, just save prescription and redirect or show message
+            header("Location: prescription-frames.php?msg=prescription_saved");
+            exit();
         }
-        header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
-        exit();
     }
 
     // If using a new prescription from the multiple list
     if ($new_prescription_data) {
         // Save the prescription first
         $stmt = $conn->prepare("INSERT INTO prescription_frames 
-            (user_id, product_id, right_eye_sphere, right_eye_cylinder, right_eye_axis, left_eye_sphere, left_eye_cylinder, left_eye_axis) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            (user_id, right_eye_sphere, right_eye_cylinder, right_eye_axis, left_eye_sphere, left_eye_cylinder, left_eye_axis) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param(
-            "iissssss",
+            "issssss",
             $user_id,
-            $product_id,
             $new_prescription_data['right_eye_sphere'],
             $new_prescription_data['right_eye_cylinder'],
             $new_prescription_data['right_eye_axis'],
@@ -97,23 +102,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
         $stmt->execute();
         $prescription_id = $conn->insert_id;
 
-        // Add to cart with new prescription_id
-        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-        $stmt->bind_param("ii", $user_id, $product_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            $cart_id = $row['id'];
-            $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
-            $stmt->bind_param("ii", $prescription_id, $cart_id);
+        if ($product_id) {
+            // Add to cart with new prescription_id
+            $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+            $stmt->bind_param("ii", $user_id, $product_id);
             $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $cart_id = $row['id'];
+                $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
+                $stmt->bind_param("ii", $prescription_id, $cart_id);
+                $stmt->execute();
+            } else {
+                $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
+                $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
+                $stmt->execute();
+            }
+            header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
+            exit();
         } else {
-            $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
-            $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
-            $stmt->execute();
+            // No product, just save prescription and redirect or show message
+            header("Location: prescription-frames.php?msg=prescription_saved");
+            exit();
         }
-        header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
-        exit();
     }
 
     // If filling out a single new prescription
@@ -125,12 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
     ) {
         // Save the prescription first
         $stmt = $conn->prepare("INSERT INTO prescription_frames 
-            (user_id, product_id, right_eye_sphere, right_eye_cylinder, right_eye_axis, left_eye_sphere, left_eye_cylinder, left_eye_axis) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            (user_id, right_eye_sphere, right_eye_cylinder, right_eye_axis, left_eye_sphere, left_eye_cylinder, left_eye_axis) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param(
-            "iissssss",
+            "issssss",
             $user_id,
-            $product_id,
             $right_eye_sphere,
             $right_eye_cylinder,
             $right_eye_axis,
@@ -141,23 +151,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_SESSION['user_id'])) {
         $stmt->execute();
         $prescription_id = $conn->insert_id;
 
-        // Add to cart with new prescription_id
-        $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
-        $stmt->bind_param("ii", $user_id, $product_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($row = $result->fetch_assoc()) {
-            $cart_id = $row['id'];
-            $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
-            $stmt->bind_param("ii", $prescription_id, $cart_id);
+        if ($product_id) {
+            // Add to cart with new prescription_id
+            $stmt = $conn->prepare("SELECT id, quantity FROM cart WHERE user_id = ? AND product_id = ?");
+            $stmt->bind_param("ii", $user_id, $product_id);
             $stmt->execute();
+            $result = $stmt->get_result();
+            if ($row = $result->fetch_assoc()) {
+                $cart_id = $row['id'];
+                $stmt = $conn->prepare("UPDATE cart SET quantity = quantity + 1, prescription_id = ? WHERE id = ?");
+                $stmt->bind_param("ii", $prescription_id, $cart_id);
+                $stmt->execute();
+            } else {
+                $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
+                $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
+                $stmt->execute();
+            }
+            header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
+            exit();
         } else {
-            $stmt = $conn->prepare("INSERT INTO cart (user_id, product_id, quantity, prescription_id) VALUES (?, ?, 1, ?)");
-            $stmt->bind_param("iii", $user_id, $product_id, $prescription_id);
-            $stmt->execute();
+            // No product, just save prescription and redirect or show message
+            header("Location: prescription-frames.php?msg=prescription_saved");
+            exit();
         }
-        header("Location: checkout.php?prescription_id=$prescription_id&product_id=$product_id");
-        exit();
     } else if (!$prescription_id && !$new_prescription_data) {
         echo '<div class="alert alert-danger">Please fill in all prescription details.</div>';
     }

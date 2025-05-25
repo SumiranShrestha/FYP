@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 22, 2025 at 07:59 PM
+-- Generation Time: May 25, 2025 at 03:53 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -62,10 +62,11 @@ CREATE TABLE `appointments` (
 --
 
 INSERT INTO `appointments` (`id`, `user_id`, `doctor_id`, `appointment_date`, `status`, `prescription`, `user_name`) VALUES
-(101, 10, 13, '2025-05-22 15:00:00', 'cancelled', NULL, NULL),
+(101, 10, 13, '2025-05-22 15:00:00', 'completed', NULL, NULL),
 (102, 10, 28, '2025-05-12 09:00:00', 'cancelled', NULL, NULL),
 (103, 10, 13, '2025-05-13 09:00:00', 'confirmed', NULL, NULL),
-(104, 10, 6, '2025-05-25 17:00:00', 'confirmed', NULL, NULL);
+(104, 10, 6, '2025-05-25 17:00:00', 'completed', '{\"right_eye_sphere\":\"1\",\"right_eye_cylinder\":\"1\",\"right_eye_axis\":\"1\",\"left_eye_sphere\":\"1\",\"left_eye_cylinder\":\"1\",\"left_eye_axis\":\"1\"}', NULL),
+(106, 10, 6, '2025-05-27 13:00:00', 'completed', '{\"right_eye_sphere\":\"1.00\",\"right_eye_cylinder\":\"1\",\"right_eye_axis\":\"1\",\"left_eye_sphere\":\"1\",\"left_eye_cylinder\":\"1\",\"left_eye_axis\":\"1\"}', NULL);
 
 -- --------------------------------------------------------
 
@@ -180,10 +181,9 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`id`, `full_name`, `email`, `password`, `phone`, `nmc_number`, `specialization`, `availability`, `created_at`, `address`, `city`) VALUES
-(6, 'Bibek Shrestha', 'mellowplays22@gmail.com', '$2y$10$BzbstVpebrsFSQUkb9hqg.Zk6I8XGBKmaIGvgx2LOxWsVeBBA.DI.', '9843641720', 'NMC123', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\",\"2:00 PM\"],\"Tuesday\":[\"1:00 PM\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
+(6, 'Bibek Shrestha', 'mellowplays22@gmail.com', '$2y$10$BzbstVpebrsFSQUkb9hqg.Zk6I8XGBKmaIGvgx2LOxWsVeBBA.DI.', '9843641720', 'NMC123', 'Eye Specialist', '{\"Monday\":[\"9:00 AM\",\"2:00 PM\"],\"Tuesday\":[\"1:00 PM\"],\"Wednesday\":[\"8am\"]}', '2025-03-26 07:37:18', 'Tokha', 'Kathmandu'),
 (13, 'Sumi Shrestha', 'sumi@gmail.com', '$2y$10$HD6a8prw7zbWNjDOxaXLlOONTUmb32XtRG5MLlkFcQjVPitao15Kq', '9826455863', 'testabc', 'Eye Specialist', '{\"Sunday\":[\"9:00 AM\"],\"Tuesday\":[\"9:00 AM\",\"2:00 PM\"]}', '2025-04-20 08:52:24', 'Tokha', 'Kathmandu'),
-(28, 'Anju Khatri', 'test@gmail.com', '$2y$10$ShCwI8iS4ftVOJq5ul93fOAQw4TLbrbJGF2DgShcooJ0H9/joIMVm', '1234567890', 'jhk121', 'Eye Specialist', '[]', '2025-05-11 05:39:49', NULL, NULL),
-(38, 'asdasd', 'sadasd@gmail.com', '$2y$10$nIp3R9d8FbGngRhURxeRtOYyiONX6/ZLpKThFAwMkhl/Rec5et56K', '9283479823', 'sdfsd232', 'Eye Specialist', '{\"Monday\":[\"9:00 AM\"],\"Thursday\":[\"5:00\"],\"Saturday\":[\"4:00 PM\",\"8:00 PM\"]}', '2025-05-22 13:47:05', NULL, NULL);
+(28, 'Anju Khatri', 'test@gmail.com', '$2y$10$ShCwI8iS4ftVOJq5ul93fOAQw4TLbrbJGF2DgShcooJ0H9/joIMVm', '1234567890', 'jhk121', 'Eye Specialist', '{\"Monday\":[\"9:00 AM\"],\"Tuesday\":[\"11:00 AM\",\"5:00 PM\"],\"Wednesday\":[\"3:00 PM\",\"4:00 PM\",\"5:00 PM\"]}', '2025-05-11 05:39:49', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -235,9 +235,49 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `user_id`, `full_name`, `email`, `phone`, `address`, `city`, `payment_method`, `total_price`, `created_at`, `status`, `prescription_id`, `order_note`) VALUES
-(147, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 1100.00, '2025-05-22 04:56:09', 'Cancelled', NULL, 'I was searching for it.'),
 (148, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 4600.00, '2025-05-22 05:31:24', 'Delivered', NULL, ''),
-(149, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-22 05:37:14', 'Pending', NULL, 'nice');
+(149, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-22 05:37:14', 'Processing', NULL, 'nice'),
+(153, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1050.00, '2025-05-24 07:55:29', NULL, NULL, NULL),
+(154, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 07:56:03', NULL, NULL, NULL),
+(155, 10, '', 'sumiranshrestha22@gmail.com', '', '', '', '', 0.00, '2025-05-24 07:57:15', NULL, NULL, ''),
+(156, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 08:50:14', 'Pending', NULL, 'I was searching for it.'),
+(157, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 08:53:00', NULL, NULL, NULL),
+(158, 10, '', 'sumiranshrestha22@gmail.com', '', '', '', '', 0.00, '2025-05-24 08:53:28', NULL, NULL, ''),
+(159, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 08:57:48', NULL, NULL, NULL),
+(160, 10, '', 'sumiranshrestha22@gmail.com', '', '', '', '', 0.00, '2025-05-24 08:58:08', NULL, NULL, ''),
+(161, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:10:02', NULL, NULL, 'I was searching for it.'),
+(162, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:12:56', NULL, NULL, ''),
+(163, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:15:32', 'Processing', NULL, ''),
+(164, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:17:49', NULL, NULL, ''),
+(165, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 10500.00, '2025-05-24 09:23:49', 'Pending', 13, ''),
+(166, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:24:49', 'Pending', 13, ''),
+(167, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:25:01', 'Pending', 13, ''),
+(168, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:34:20', NULL, NULL, NULL),
+(169, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:35:18', NULL, NULL, NULL),
+(170, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:39:03', NULL, NULL, NULL),
+(171, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 5300.00, '2025-05-24 09:39:39', 'Pending', NULL, ''),
+(172, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:42:21', NULL, NULL, NULL),
+(173, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:44:25', NULL, NULL, NULL),
+(174, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 09:45:09', NULL, NULL, NULL),
+(175, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:46:55', NULL, NULL, NULL),
+(176, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1000.00, '2025-05-24 09:49:34', NULL, NULL, NULL),
+(177, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:51:50', NULL, NULL, NULL),
+(178, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:53:12', NULL, NULL, NULL),
+(179, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:54:54', NULL, NULL, NULL),
+(180, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 1600.00, '2025-05-24 09:55:29', 'Pending', NULL, ''),
+(181, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:57:03', NULL, NULL, NULL),
+(182, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 09:58:23', NULL, NULL, NULL),
+(183, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 10:00:13', NULL, NULL, NULL),
+(184, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 10:01:52', NULL, NULL, NULL),
+(185, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1600.00, '2025-05-24 10:15:55', 'Processing', NULL, ''),
+(186, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 5300.00, '2025-05-24 10:16:34', 'Processing', NULL, ''),
+(187, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 1600.00, '2025-05-24 10:16:48', 'Pending', NULL, ''),
+(188, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'khalti', 1050.00, '2025-05-24 10:17:22', 'Processing', 13, ''),
+(189, 10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 1050.00, '2025-05-24 10:17:38', 'Delivered', 13, ''),
+(190, 40, 'Testing', 'Testing@gmail.com', '9843641720', 'Tokha', 'Kathmandu', 'cod', 1000.00, '2025-05-25 13:43:27', 'Pending', NULL, 'Lovely Product'),
+(191, 40, 'Testing', 'sumiranshrestha22@gmail.com', '9843641720', 'asd', 'asd', 'cod', 5300.00, '2025-05-25 13:47:22', 'Pending', NULL, 'sdfsdfsdfsdfdsfdsfsfsdfsdfdsfsdf'),
+(192, 40, 'Testing', 'sumiranshrestha22@gmail.com', '9843641720', 'asd', 'asd', 'cod', 1600.00, '2025-05-25 13:48:51', 'Pending', NULL, ''),
+(193, 40, 'Testing', 'sumiranshrestha22@gmail.com', '9843641720', 'asd', 'asd', 'cod', 1600.00, '2025-05-25 13:50:06', 'Cancelled', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -253,6 +293,45 @@ CREATE TABLE `order_items` (
   `price` decimal(10,2) NOT NULL,
   `payment_method` varchar(50) DEFAULT 'cod'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`, `payment_method`) VALUES
+(58, 153, 14, 1, 950.00, 'cod'),
+(59, 154, 36, 1, 1500.00, 'cod'),
+(60, 157, 1, 1, 5200.00, 'cod'),
+(61, 159, 1, 1, 5200.00, 'cod'),
+(62, 165, 1, 2, 5200.00, '0'),
+(63, 166, 1, 1, 5200.00, '0'),
+(64, 167, 1, 1, 5200.00, '0'),
+(65, 168, 1, 1, 5200.00, 'cod'),
+(66, 169, 1, 1, 5200.00, 'cod'),
+(67, 170, 1, 1, 5200.00, 'cod'),
+(68, 171, 1, 1, 5200.00, '0'),
+(69, 172, 1, 1, 5200.00, 'cod'),
+(70, 173, 1, 1, 5200.00, 'cod'),
+(71, 174, 1, 1, 5200.00, 'cod'),
+(72, 175, 36, 1, 1500.00, 'cod'),
+(73, 176, 46, 1, 900.00, 'cod'),
+(74, 177, 36, 1, 1500.00, 'cod'),
+(75, 178, 36, 1, 1500.00, 'cod'),
+(76, 179, 36, 1, 1500.00, 'cod'),
+(77, 180, 36, 1, 1500.00, '0'),
+(78, 181, 36, 1, 1500.00, 'cod'),
+(79, 182, 36, 1, 1500.00, 'cod'),
+(80, 183, 36, 1, 1500.00, 'cod'),
+(81, 184, 36, 1, 1500.00, 'cod'),
+(82, 185, 36, 1, 1500.00, '0'),
+(83, 186, 1, 1, 5200.00, '0'),
+(84, 187, 36, 1, 1500.00, '0'),
+(85, 188, 14, 1, 950.00, '0'),
+(86, 189, 14, 1, 950.00, '0'),
+(87, 190, 46, 1, 900.00, '0'),
+(88, 191, 1, 1, 5200.00, '0'),
+(89, 192, 4, 1, 1500.00, '0'),
+(90, 193, 4, 1, 1500.00, '0');
 
 -- --------------------------------------------------------
 
@@ -286,7 +365,7 @@ CREATE TABLE `prescription_frames` (
 --
 
 INSERT INTO `prescription_frames` (`id`, `user_id`, `order_id`, `cart_id`, `right_eye_sphere`, `right_eye_cylinder`, `right_eye_axis`, `right_eye_pd`, `left_eye_sphere`, `left_eye_cylinder`, `left_eye_axis`, `left_eye_pd`, `frame_model`, `lens_type`, `coating_type`, `created_at`, `updated_at`, `product_id`) VALUES
-(8, 10, NULL, NULL, 1.00, 1.00, 1, NULL, 1.00, 1.00, 1, NULL, NULL, 'single_vision', 'anti_reflective', '2025-05-11 04:23:15', '2025-05-11 04:23:15', 35);
+(13, 10, NULL, NULL, 1.00, 1.00, 1, NULL, 1.00, 1.00, 1, NULL, NULL, 'single_vision', 'anti_reflective', '2025-05-24 09:08:54', '2025-05-24 09:08:54', 0);
 
 -- --------------------------------------------------------
 
@@ -322,7 +401,12 @@ CREATE TABLE `prescription_orders` (
 --
 
 INSERT INTO `prescription_orders` (`id`, `user_id`, `product_id`, `prescription_id`, `right_eye_sphere`, `right_eye_cylinder`, `right_eye_axis`, `right_eye_pd`, `left_eye_sphere`, `left_eye_cylinder`, `left_eye_axis`, `left_eye_pd`, `lens_type`, `coating_type`, `frame_color`, `frame_size`, `status`, `created_at`, `updated_at`, `order_type`) VALUES
-(4, 10, 1, NULL, -1.25, 0.00, 0, 0.00, -1.00, 0.00, 0, 0.00, 'single_vision', 'blue_light', 'black', 'medium', 'submitted', '2025-05-22 14:27:30', '2025-05-22 14:39:24', 'with_prescription');
+(7, 10, 1, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'submitted', '2025-05-24 09:23:49', '2025-05-24 09:23:49', 'with_prescription'),
+(8, 10, 1, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'draft', '2025-05-24 09:24:25', '2025-05-24 09:24:25', 'with_prescription'),
+(9, 10, 1, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'submitted', '2025-05-24 09:24:49', '2025-05-24 09:24:49', 'with_prescription'),
+(10, 10, 1, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'draft', '2025-05-24 09:25:00', '2025-05-24 09:25:00', 'with_prescription'),
+(11, 10, 1, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'submitted', '2025-05-24 09:25:01', '2025-05-24 09:25:01', 'with_prescription'),
+(12, 10, 14, 13, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'single_vision', 'anti_reflective', NULL, NULL, 'submitted', '2025-05-24 10:17:22', '2025-05-24 10:17:22', 'with_prescription');
 
 -- --------------------------------------------------------
 
@@ -351,7 +435,7 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `name`, `description`, `price`, `discount_price`, `stock`, `brand_id`, `images`, `created_at`, `category_id`, `prescription_required`, `frame_types_available`, `facial_structure`) VALUES
-(1, 'Ray-Ban RB2210', 'Ray-Ban RB2210\r\nSize Details: 53🔲20 145\r\n\r\nLens Color: Green\r\n\r\nElevate your style with the Ray-Ban RB2210, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from Acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nWhether you\'re on the go or lounging outdoors, the Ray-Ban RB2210 is the ultimate accessory for both style and performance. Get yours today!', 5800.00, 5200.00, 15, 1, '[\"..\\/uploads\\/67f65bd4d8f0e_product_image-img_1051-0498 (1).webp\",\"..\\/uploads\\/67f65be3df3fd_image (4).webp\",\"..\\/uploads\\/67f65bf3266ee_product_image-img_1053-2559 (1).webp\",\"..\\/uploads\\/67f65c02600b8_product_image-img_1054-8632 (1).webp\"]', '2025-03-07 09:58:41', 2, 0, NULL, 'all'),
+(1, 'Ray-Ban RB2210', 'Ray-Ban RB2210\r\nSize Details: 53🔲20 145\r\n\r\nLens Color: Green\r\n\r\nElevate your style with the Ray-Ban RB2210, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from Acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nWhether you\'re on the go or lounging outdoors, the Ray-Ban RB2210 is the ultimate accessory for both style and performance. Get yours today!', 5800.00, 5200.00, 15, 1, '[\"..\\/uploads\\/67f65bd4d8f0e_product_image-img_1051-0498 (1).webp\",\"..\\/uploads\\/67f65be3df3fd_image (4).webp\",\"..\\/uploads\\/67f65bf3266ee_product_image-img_1053-2559 (1).webp\",\"..\\/uploads\\/67f65c02600b8_product_image-img_1054-8632 (1).webp\"]', '2025-03-07 09:58:41', 2, 1, NULL, 'all'),
 (2, 'Oakley Gascan Sunglasses for Men', 'Timeless Style Meets Ultimate Protection\r\n\r\nExperience the perfect combination of style, comfort, and performance with our expertly crafted sunglasses. Designed for every occasion, they offer unparalleled protection and timeless appeal.\r\n\r\nKey Highlights:\r\n100% UV Protection: Safeguard your eyes from harmful UVA and UVB rays.\r\n\r\nDurable Frames: Built with high quality acetate, ensuring a lightweight yet sturdy fit.\r\n\r\nHigh-Quality Lenses: Engineered to reduce brightness while offering 100% UV protection, ensuring a clear and comfortable view.\r\n\r\nVersatile Design: Flattering for all face shapes and ideal for both casual and formal wear.\r\n\r\nWhether you\'re hitting the beach, driving through scenic routes, or simply enjoying a sunny day, these sunglasses are the perfect accessory to elevate your look and protect your eyes.', 3500.00, 2800.00, 12, 2, '[\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0911-5820.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0912-7064.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0913-5505.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_0914-2828.webp\"]', '2025-03-07 09:58:41', 1, 0, NULL, 'all'),
 (3, 'Gucci Square Unisex Leopard Print Sunglasses', 'Description\r\n\r\nGucci [GG1084S 008G] Sunglasses\r\n\r\nElevate your style with the Gucci [GG1084S 008G], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\r\n\r\nKey Features:\r\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\r\n\r\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\r\n\r\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\r\n\r\nDesign: Sleek, modern, and timeless design that suits every face shape.\r\n\r\nSize Details:\r\nLens Width: 53 mm\r\n\r\nBridge Width: 20 mm\r\n\r\nTemple Length: 145 mm\r\n\r\nWhether you\'re on the go or lounging outdoors, the Gucci [GG1084S 008G] is the ultimate accessory for both style and performance. Get yours today!', 5000.00, 2200.00, 10, 3, '[\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9831-0018.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9832-7042.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9830-5644.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9828-5364.webp\",\"https:\\/\\/cdn2.blanxer.com\\/uploads\\/64205ca09ab9997729605f15\\/product_image-img_9829-9905.webp\"]', '2025-03-07 09:58:41', 1, 0, NULL, 'all'),
 (4, 'Versace Oval Women\'s Sunglasses', 'Description\n\nVersace Sunglasses\n\nElevate your style with the Versace Sunglass, a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium polycarbonate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with non-polarized lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nWhether you\'re on the go or lounging outdoors, the Versace Sunglass is the ultimate accessory for both style and performance. Get yours today!', 1500.00, 0.00, 8, 4, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0749-7065.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0750-8111.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0751-4585.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0752-1313.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
@@ -361,7 +445,8 @@ INSERT INTO `products` (`id`, `name`, `description`, `price`, `discount_price`, 
 (8, 'Burberry Square Women\'s Sunglass\n', 'Description\n\nBurberry [Model] Sunglasses\n\nElevate your style with the Burberry [Model], a perfect fusion of fashion and functionality. Designed to provide optimal protection from harmful UV rays, these sunglasses offer not just comfort but also a statement piece to complete any look.\n\nKey Features:\nUV Protection: Safeguard your eyes with 100% UVA/UVB protection, perfect for sunny days.\n\nFrame Material: Crafted from premium acetate, offering durability and a lightweight feel for all-day comfort.\n\nLens Type: Equipped with gradient lenses to reduce glare and enhance visual clarity.\n\nDesign: Sleek, modern, and timeless design that suits every face shape.\n\nSize Details:\nLens Width: XX mm\n\nBridge Width: XX mm\n\nTemple Length: 145 mm\n\nWhether you\'re on the go or lounging outdoors, the Burberry [Model] is the ultimate accessory for both style and performance. Get yours today!', 7000.00, 4500.00, 9, 8, '[\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0434-7678.webp\", \"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0436-8460.webp\",\"https://cdn2.blanxer.com/uploads/64205ca09ab9997729605f15/product_image-img_0435-8310.webp\"]', '2025-03-07 09:58:41', NULL, 0, NULL, 'all'),
 (14, 'Magic TR Transparent, Blue-cut Frame (Small Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cover', 1299.00, 950.00, 1, 1, '[\"..\\/uploads\\/67f65a9e486d7_product_image-img_0185-0987 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL, 'all'),
 (20, 'Magic TR Transparent, Blue-cut Frame (Big Cat-eye)', 'The Magic TR Transparent Prescription Frame offers a sleek, lightweight design with a modern, clear finish. Durable and comfortable, it provides a stylish yet subtle look for everyday wear. Perfect for those seeking both function and fashion in their eyewear.\r\n\r\nComes with:\r\n\r\nCleaning Cloth\r\n\r\nChain Cove', 1299.00, 950.00, 1, 4, '[\"..\\/uploads\\/67f6586be8d5f_product_image-img_0169-9658 (1).webp\"]', '2025-03-29 09:05:53', 4, 1, NULL, 'oval'),
-(36, 'Testing', 'The best Sunglasses ever', 20000.00, 1500.00, 3, 1, '[\"..\\/uploads\\/682f1704bfba2_product_image-img_1054-8632 (1).webp\"]', '2025-05-22 10:07:09', 1, 0, 'both', 'oval');
+(36, 'Testing', 'The best Sunglasses ever', 20000.00, 1500.00, 3, 1, '[\"..\\/uploads\\/682f1704bfba2_product_image-img_1054-8632 (1).webp\"]', '2025-05-22 10:07:09', 1, 0, 'both', 'oval'),
+(46, 'sfddsf', 'zdfgv;oihcvlijzcxlvijzdsflkj', 4900.00, 900.00, 5, 5, '[\"..\\/uploads\\/68314f77312c9_product_image-img_1052-6304.webp\",\"..\\/uploads\\/68314f7731c0c_product_image-img_1051-0498.webp\"]', '2025-05-24 04:42:57', 2, 0, 'both', 'round');
 
 -- --------------------------------------------------------
 
@@ -386,10 +471,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `user_name`, `user_email`, `user_password`, `registration_date`, `phone`, `address`, `city`, `active`) VALUES
-(10, 'Sumiran Shrestha', 'sumiranshrestha22@gmail.com', '$2y$10$9sxQVN2EfBT/mxlSSMTOuu6Vn3VpNRUvbFWAwewthiuptse64RQLW', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
+(10, 'Sumiran Shrestha', 'ghjk', '$2y$10$u8fqyel8TeQbL0bAmCHb/O2lBPh3EqL39AwAs02xNUuQncQtMdhvm', '2025-04-20 10:14:42', '9843641720', 'Tokha', 'Kathmandu', 1),
 (16, 'Mellow Plays', '', '$2y$10$eaJl391wb1qU2i.cKvNVUeKZYkb7TtxDiJC1Y8rV0PzJBsXk4SwVW', '2025-04-20 10:14:42', '9826455863', 'Dhapasi', 'Kathmandu', 1),
-(34, 'test', 'test@gmail.com', '$2y$10$Clxu4Z8iDz2JyvoFNEmmv.IVjiXBx.hKFoY4DmnuoZOSzBHr8XT9G', '2025-05-22 18:43:32', 'qweqw', 'qweqw', 'qweqw', 0),
-(38, 'asdasda', 'asd@gmail.com', '$2y$10$9.WTtGLjcu/THJZUQfuq6eCNvWjjr5REYSsA8PrlxU8j.a5Scjw/u', '2025-05-22 23:17:54', '', '', '', 1);
+(40, 'Testing', 'sumiranshrestha22@gmail.com', '$2y$10$jP/.NnpWZBiPlLNzZnJCIuvapKN3b/rYFodeVK4WDAspjnVvKqK4y', '2025-05-25 19:25:55', '9843641720', 'asd', 'asd', 1);
 
 --
 -- Indexes for dumped tables
@@ -515,7 +599,7 @@ ALTER TABLE `admins`
 -- AUTO_INCREMENT for table `appointments`
 --
 ALTER TABLE `appointments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
 
 --
 -- AUTO_INCREMENT for table `banners`
@@ -527,13 +611,13 @@ ALTER TABLE `banners`
 -- AUTO_INCREMENT for table `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=236;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=281;
 
 --
 -- AUTO_INCREMENT for table `categories`
@@ -545,49 +629,49 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `doctors`
 --
 ALTER TABLE `doctors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `faqs`
 --
 ALTER TABLE `faqs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=153;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=194;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=91;
 
 --
 -- AUTO_INCREMENT for table `prescription_frames`
 --
 ALTER TABLE `prescription_frames`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `prescription_orders`
 --
 ALTER TABLE `prescription_orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- Constraints for dumped tables

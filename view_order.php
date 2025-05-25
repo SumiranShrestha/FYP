@@ -70,10 +70,32 @@ while ($row = $order_items_result->fetch_assoc()) {
       <div class="card-body">
           <p><strong>Total Amount:</strong> Rs <?= number_format($order['total_price'], 2); ?></p>
           <p><strong>Status:</strong>
-            <span class="badge 
-                <?= strtolower($order['status']) === 'delivered' ? 'bg-success' : (strtolower($order['status']) === 'cancelled' ? 'bg-danger' : (strtolower($order['status']) === 'pending' ? 'bg-warning' : 'bg-secondary')) ?>">
-                <?= ucfirst(strtolower($order['status'])) ?>
-            </span>
+            <?php
+              $status = $order['status'];
+              if ($status === null) {
+                  // Treat NULL as "Pending"
+                  $status = 'Pending';
+              }
+              $badgeClass = 'bg-secondary';
+              switch ($status) {
+                  case 'Delivered':
+                      $badgeClass = 'bg-success';
+                      break;
+                  case 'Cancelled':
+                      $badgeClass = 'bg-danger';
+                      break;
+                  case 'Pending':
+                      $badgeClass = 'bg-warning text-dark';
+                      break;
+                  case 'Processing':
+                      $badgeClass = 'bg-info text-dark';
+                      break;
+                  case 'Shipped':
+                      $badgeClass = 'bg-primary';
+                      break;
+              }
+              echo '<span class="badge ' . $badgeClass . '">' . htmlspecialchars($status) . '</span>';
+            ?>
           </p>
           <!-- Add any additional order details you want to display here -->
       </div>

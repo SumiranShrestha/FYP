@@ -31,6 +31,18 @@ if (!$order) {
     exit();
 }
 
+// Fetch prescription frame if with_prescription and prescription_id exists
+$prescription = null;
+if ($order['order_type'] === 'with_prescription' && !empty($order['prescription_id'])) {
+    $presc_stmt = $conn->prepare("SELECT * FROM prescription_frames WHERE id = ?");
+    $presc_stmt->bind_param("i", $order['prescription_id']);
+    $presc_stmt->execute();
+    $presc_result = $presc_stmt->get_result();
+    if ($presc_result && $presc_result->num_rows > 0) {
+        $prescription = $presc_result->fetch_assoc();
+    }
+}
+
 // Handle update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $status = $_POST['status'];
@@ -78,6 +90,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navbar Header (same as manage_orders.php/manage_prescription_orders.php) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">Shady Shades Admin</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage_users.php">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage_products.php">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage_orders.php">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="manage_prescription_orders.php">Prescription Orders</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <span class="text-light me-3">Welcome, <?= htmlspecialchars($_SESSION["admin_username"]); ?></span>
+                    <!-- Logout button triggers modal -->
+                    <button id="logoutBtn" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- End Navbar Header -->
+
 <div class="container my-5">
     <a href="manage_prescription_orders.php" class="btn btn-secondary mb-3">&larr; Back to Orders</a>
     <h2 class="mb-4">Edit Prescription Order #<?= htmlspecialchars($order['id']) ?></h2>
@@ -160,42 +206,92 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row mb-3">
             <div class="col-md-3">
                 <label class="form-label">Right Eye Sphere</label>
-                <input type="number" step="0.01" name="right_eye_sphere" class="form-control" value="<?= htmlspecialchars($order['right_eye_sphere']) ?>">
+                <input type="number" step="0.01" name="right_eye_sphere" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['right_eye_sphere'] ?? $order['right_eye_sphere']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Right Eye Cylinder</label>
-                <input type="number" step="0.01" name="right_eye_cylinder" class="form-control" value="<?= htmlspecialchars($order['right_eye_cylinder']) ?>">
+                <input type="number" step="0.01" name="right_eye_cylinder" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['right_eye_cylinder'] ?? $order['right_eye_cylinder']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Right Eye Axis</label>
-                <input type="number" name="right_eye_axis" class="form-control" value="<?= htmlspecialchars($order['right_eye_axis']) ?>">
+                <input type="number" name="right_eye_axis" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['right_eye_axis'] ?? $order['right_eye_axis']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Right Eye PD</label>
-                <input type="number" step="0.01" name="right_eye_pd" class="form-control" value="<?= htmlspecialchars($order['right_eye_pd']) ?>">
+                <input type="number" step="0.01" name="right_eye_pd" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['right_eye_pd'] ?? $order['right_eye_pd']
+                    ) ?>">
             </div>
         </div>
         <div class="row mb-3">
             <div class="col-md-3">
                 <label class="form-label">Left Eye Sphere</label>
-                <input type="number" step="0.01" name="left_eye_sphere" class="form-control" value="<?= htmlspecialchars($order['left_eye_sphere']) ?>">
+                <input type="number" step="0.01" name="left_eye_sphere" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['left_eye_sphere'] ?? $order['left_eye_sphere']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Left Eye Cylinder</label>
-                <input type="number" step="0.01" name="left_eye_cylinder" class="form-control" value="<?= htmlspecialchars($order['left_eye_cylinder']) ?>">
+                <input type="number" step="0.01" name="left_eye_cylinder" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['left_eye_cylinder'] ?? $order['left_eye_cylinder']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Left Eye Axis</label>
-                <input type="number" name="left_eye_axis" class="form-control" value="<?= htmlspecialchars($order['left_eye_axis']) ?>">
+                <input type="number" name="left_eye_axis" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['left_eye_axis'] ?? $order['left_eye_axis']
+                    ) ?>">
             </div>
             <div class="col-md-3">
                 <label class="form-label">Left Eye PD</label>
-                <input type="number" step="0.01" name="left_eye_pd" class="form-control" value="<?= htmlspecialchars($order['left_eye_pd']) ?>">
+                <input type="number" step="0.01" name="left_eye_pd" class="form-control"
+                    value="<?= htmlspecialchars(
+                        $prescription['left_eye_pd'] ?? $order['left_eye_pd']
+                    ) ?>">
             </div>
         </div>
         <button type="submit" class="btn btn-primary mt-3">Update Order</button>
     </form>
 </div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+            <div class="modal-body text-center py-4">
+                <h5 class="fw-bold mb-3">Logout</h5>
+                <div class="mb-4">Are you sure you want to logout?</div>
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                    <a href="admin_logout.php" class="btn btn-primary px-4">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script>
+// Logout confirmation logic
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault();
+    var modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+    modal.show();
+});
+</script>
 </body>
 </html>

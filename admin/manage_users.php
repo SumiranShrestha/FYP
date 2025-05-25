@@ -19,19 +19,46 @@ if (isset($_GET['delete_user'])) {
         exit();
     }
 
-    // Delete dependent records in prescription_frames
-    $stmt = $conn->prepare("DELETE FROM prescription_frames WHERE user_id = ?");
+    // 1. Get all prescription_frame ids for this user
+    $prescription_frame_ids = [];
+    $stmt = $conn->prepare("SELECT id FROM prescription_frames WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
+    $result_frames = $stmt->get_result();
+    while ($row = $result_frames->fetch_assoc()) {
+        $prescription_frame_ids[] = $row['id'];
+    }
     $stmt->close();
 
-    // Delete dependent records in prescription_orders
+    if (!empty($prescription_frame_ids)) {
+        $ids_str = implode(',', array_map('intval', $prescription_frame_ids));
+
+        // 2. Delete orders referencing these prescription_frames
+        $conn->query("DELETE FROM orders WHERE prescription_id IN ($ids_str)");
+
+        // 3. Delete prescription_orders referencing these prescription_frames
+        $conn->query("DELETE FROM prescription_orders WHERE prescription_id IN ($ids_str)");
+    }
+
+    // 4. Delete prescription_orders by user (in case any remain)
     $stmt = $conn->prepare("DELETE FROM prescription_orders WHERE user_id = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $stmt->close();
 
-    // Now delete the user
+    // 5. Delete prescription_frames by user
+    $stmt = $conn->prepare("DELETE FROM prescription_frames WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // 6. Delete dependent records in prescription_orders (again, for safety)
+    $stmt = $conn->prepare("DELETE FROM prescription_orders WHERE user_id = ?");
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $stmt->close();
+
+    // 7. Now delete the user
     $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
     $stmt->bind_param("i", $user_id);
     if ($stmt->execute()) {

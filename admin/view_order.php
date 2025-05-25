@@ -2,6 +2,14 @@
 session_start();
 include("server/connection.php");
 
+// Add PHPMailer for sending emails
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once '../PHPMailer-master/src/PHPMailer.php';
+require_once '../PHPMailer-master/src/SMTP.php';
+require_once '../PHPMailer-master/src/Exception.php';
+
 if (!isset($_SESSION["admin_logged_in"])) {
     header("Location: admin_login.php");
     exit();
@@ -46,10 +54,66 @@ if (!empty($order['prescription_id'])) {
 
 // Handle status update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    // Fetch current status from DB to prevent bypass
+    $current_status_stmt = $conn->prepare("SELECT status FROM orders WHERE id = ?");
+    $current_status_stmt->bind_param("i", $order_id);
+    $current_status_stmt->execute();
+    $current_status_result = $current_status_stmt->get_result();
+    $block_update = false;
+    $send_mail = false;
+    if ($current_status_result && $current_status_result->num_rows > 0) {
+        $row = $current_status_result->fetch_assoc();
+        if ($row['status'] === 'Delivered' || $row['status'] === 'Cancelled') {
+            $block_update = true;
+        }
+        if ($row['status'] !== $_POST['status']) {
+            $send_mail = true;
+        }
+    }
+    if ($block_update) {
+        $_SESSION['alert_message'] = "Cannot change status. Order is already '{$row['status']}'.";
+        $_SESSION['alert_type'] = "warning";
+        header("Location: view_order.php?id=" . $order_id);
+        exit();
+    }
+
     $new_status = $_POST['status'];
     $update_stmt = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
     $update_stmt->bind_param("si", $new_status, $order_id);
     if ($update_stmt->execute()) {
+        if ($send_mail) {
+            // Fetch user email and name for this order
+            $user_stmt = $conn->prepare("SELECT u.user_email, u.user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?");
+            $user_stmt->bind_param("i", $order_id);
+            $user_stmt->execute();
+            $user_result = $user_stmt->get_result();
+            if ($user_result && $user_result->num_rows > 0) {
+                $user = $user_result->fetch_assoc();
+                $user_email = $user['user_email'];
+                $user_name = $user['user_name'];
+
+                // Send email notification
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'np03cs4s230199@heraldcollege.edu.np'; // Replace with your Gmail
+                    $mail->Password = 'gwwj hdus ymxk eluw'; // Replace with Gmail App Password
+                    $mail->SMTPSecure = 'tls';
+                    $mail->Port = 587;
+
+                    $mail->setFrom('np03cs4s230199@heraldcollege.edu.np', 'Shady Shades');
+                    $mail->addAddress($user_email, $user_name);
+                    $mail->Subject = 'Your Order Status Has Changed';
+                    $mail->Body = "Dear $user_name,\n\nYour order (Order ID: $order_id) status has been updated to '$new_status'.\n\nThank you for shopping with Shady Shades!";
+
+                    $mail->send();
+                } catch (Exception $e) {
+                    // Optionally log or handle email error, but do not block the process
+                }
+            }
+        }
         $_SESSION['alert_message'] = "Order status updated successfully";
         $_SESSION['alert_type'] = "success";
         // Refresh the page to show the updated status
@@ -126,24 +190,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                         <p><strong>Date:</strong> <?= date('F j, Y', strtotime($order['created_at'])); ?></p>
                         <p><strong>Status:</strong> 
                             <?php
-                            switch($order['status']) {
-                                case 'Pending':
-                                    echo '<span class="badge bg-warning text-dark">Pending</span>';
-                                    break;
-                                case 'Processing':
-                                    echo '<span class="badge bg-info text-dark">Processing</span>';
-                                    break;
-                                case 'Shipped':
-                                    echo '<span class="badge bg-primary">Shipped</span>';
-                                    break;
-                                case 'Delivered':
-                                    echo '<span class="badge bg-success">Delivered</span>';
-                                    break;
-                                case 'Cancelled':
-                                    echo '<span class="badge bg-danger">Cancelled</span>';
-                                    break;
-                                default:
-                                    echo '<span class="badge bg-secondary">Pending</span>';
+                            $status = $order['status'];
+                            if (is_null($status) || $status === '') {
+                                // Treat NULL or empty as Pending
+                                echo '<span class="badge bg-warning text-dark">Pending</span>';
+                            } else {
+                                switch($status) {
+                                    case 'Pending':
+                                        echo '<span class="badge bg-warning text-dark">Pending</span>';
+                                        break;
+                                    case 'Processing':
+                                        echo '<span class="badge bg-info text-dark">Processing</span>';
+                                        break;
+                                    case 'Shipped':
+                                        echo '<span class="badge bg-primary">Shipped</span>';
+                                        break;
+                                    case 'Delivered':
+                                        echo '<span class="badge bg-success">Delivered</span>';
+                                        break;
+                                    case 'Cancelled':
+                                        echo '<span class="badge bg-danger">Cancelled</span>';
+                                        break;
+                                    default:
+                                        echo '<span class="badge bg-secondary">Unknown</span>';
+                                }
                             }
                             ?>
                         </p>
@@ -187,16 +257,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                     <div class="row">
                         <div class="col-md-6">
                             <label for="status" class="form-label"><strong>Update Status:</strong></label>
-                            <select name="status" id="status" class="form-select">
+                            <?php
+                            $is_final = ($order['status'] === 'Delivered' || $order['status'] === 'Cancelled');
+                            ?>
+                            <select name="status" id="status" class="form-select" <?= $is_final ? 'disabled' : '' ?>>
                                 <option value="Pending" <?= $order['status'] === 'Pending' ? 'selected' : ''; ?>>Pending</option>
                                 <option value="Processing" <?= $order['status'] === 'Processing' ? 'selected' : ''; ?>>Processing</option>
                                 <option value="Shipped" <?= $order['status'] === 'Shipped' ? 'selected' : ''; ?>>Shipped</option>
                                 <option value="Delivered" <?= $order['status'] === 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
                                 <option value="Cancelled" <?= $order['status'] === 'Cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                             </select>
+                            <?php if ($is_final): ?>
+                                <div class="small text-muted mt-1">Status cannot be changed</div>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
-                            <button type="submit" name="update_status" class="btn btn-primary">
+                            <button type="submit" name="update_status" class="btn btn-primary" <?= $is_final ? 'disabled' : '' ?>>
                                 <i class="bi bi-arrow-repeat me-1"></i>Update Status
                             </button>
                         </div>

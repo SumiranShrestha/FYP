@@ -232,26 +232,48 @@ unset($_SESSION['alert_type']);
                                     if (!empty($doctor['availability'])) {
                                         $availability = json_decode($doctor['availability'], true);
                                     }
+                                    $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                     ?>
-                                    <form method="POST" action="update_availability.php">
+                                    <form method="POST" action="update_availability.php" id="availabilityForm">
                                         <div class="mb-3">
                                             <label class="form-label">Day</label>
                                             <select name="day" class="form-select" required>
                                                 <option value="">Select Day</option>
-                                                <?php
-                                                $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-                                                foreach ($days as $day) {
-                                                    echo '<option value="' . $day . '">' . $day . '</option>';
-                                                }
-                                                ?>
+                                                <?php foreach ($days as $day): ?>
+                                                    <option value="<?= $day ?>"><?= $day ?></option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label">Available Time(s) (comma separated)</label>
-                                            <input type="text" name="times" class="form-control" placeholder="e.g. 10:00 AM, 2:00 PM" required>
+                                            <label class="form-label">Available Time(s) <span class="text-muted">(e.g. 9:00 AM, 2:00 PM)</span></label>
+                                            <input type="text" name="times" class="form-control" placeholder="e.g. 9:00 AM, 2:00 PM" required id="timeSlotsInput">
+                                            <div class="form-text text-danger" id="timeFormatError" style="display:none;">Please enter time(s) in the format: 9:00 AM, 2:00 PM</div>
                                         </div>
                                         <button type="submit" class="btn btn-success mb-2">Add/Update Availability</button>
                                     </form>
+                                    <script>
+                                        // Auto-format time slots to "AM"/"PM" (capitalize) before validation and submission
+                                        document.getElementById('availabilityForm').addEventListener('submit', function(e) {
+                                            var inputElem = document.getElementById('timeSlotsInput');
+                                            var input = inputElem.value.trim();
+                                            if (!input) return; // required attribute will catch empty
+
+                                            // Replace lowercase am/pm with uppercase
+                                            input = input.replace(/\b(am|pm)\b/gi, function(match) {
+                                                return match.toUpperCase();
+                                            });
+                                            inputElem.value = input;
+
+                                            // Regex for "h:mm AM/PM" or "hh:mm AM/PM", comma separated
+                                            var regex = /^(\d{1,2}:\d{2}\s?(AM|PM))(,\s*\d{1,2}:\d{2}\s?(AM|PM))*$/i;
+                                            if (!regex.test(input)) {
+                                                document.getElementById('timeFormatError').style.display = 'block';
+                                                e.preventDefault();
+                                            } else {
+                                                document.getElementById('timeFormatError').style.display = 'none';
+                                            }
+                                        });
+                                    </script>
                                     <?php if (!empty($availability)): ?>
                                         <div class="mt-3">
                                             <h6>Current Availability:</h6>
@@ -262,11 +284,15 @@ unset($_SESSION['alert_type']);
                                                             <strong><?= htmlspecialchars($day) ?>:</strong>
                                                             <?= is_array($times) ? htmlspecialchars(implode(', ', $times)) : htmlspecialchars($times) ?>
                                                         </span>
-                                                        <form method="POST" action="update_availability.php" style="margin:0;">
+                                                        <button 
+                                                            type="button"
+                                                            class="btn btn-sm btn-danger delete-availability-btn"
+                                                            data-day="<?= htmlspecialchars($day) ?>"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                        <form method="POST" action="update_availability.php" class="d-none delete-availability-form">
                                                             <input type="hidden" name="delete_day" value="<?= htmlspecialchars($day) ?>">
-                                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete availability for <?= htmlspecialchars($day) ?>?')">
-                                                                Delete
-                                                            </button>
                                                         </form>
                                                     </li>
                                                 <?php endforeach; ?>
@@ -327,10 +353,32 @@ unset($_SESSION['alert_type']);
                                                         <td><?= htmlspecialchars($order['item_count']); ?></td>
                                                         <td>Rs <?= number_format($order['total_price'], 2); ?></td>
                                                         <td>
-                                                            <span class="badge 
-                                                                <?= strtolower($order['status']) === 'delivered' ? 'bg-success' : (strtolower($order['status']) === 'cancelled' ? 'bg-danger' : (strtolower($order['status']) === 'pending' ? 'bg-warning' : 'bg-secondary')) ?>">
-                                                                <?= ucfirst(strtolower($order['status'])) ?>
-                                                            </span>
+                                                            <?php
+                                                                $status = $order['status'];
+                                                                if ($status === null) {
+                                                                    // Treat NULL as "Pending"
+                                                                    $status = 'Pending';
+                                                                }
+                                                                $badgeClass = 'bg-secondary';
+                                                                switch ($status) {
+                                                                    case 'Delivered':
+                                                                        $badgeClass = 'bg-success';
+                                                                        break;
+                                                                    case 'Cancelled':
+                                                                        $badgeClass = 'bg-danger';
+                                                                        break;
+                                                                    case 'Pending':
+                                                                        $badgeClass = 'bg-warning text-dark';
+                                                                        break;
+                                                                    case 'Processing':
+                                                                        $badgeClass = 'bg-info text-dark';
+                                                                        break;
+                                                                    case 'Shipped':
+                                                                        $badgeClass = 'bg-primary';
+                                                                        break;
+                                                                }
+                                                                echo '<span class="badge ' . $badgeClass . '">' . htmlspecialchars($status) . '</span>';
+                                                            ?>
                                                         </td>
                                                         <td>
                                                             <a href="view_order.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-primary">View</a>
@@ -412,6 +460,24 @@ unset($_SESSION['alert_type']);
         </div>
     </div>
 
+    <!-- Delete Availability Confirmation Modal -->
+    <div class="modal fade" id="deleteAvailabilityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="min-width:320px;max-width:350px;margin:auto;">
+                <div class="modal-body text-center py-4">
+                    <h5 class="fw-bold mb-3">Delete Availability</h5>
+                    <div class="mb-4">
+                        Are you sure you want to delete availability for <span id="availabilityDay" class="fw-bold"></span>?
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-outline-danger px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button id="confirmDeleteAvailabilityBtn" class="btn btn-primary px-4">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const toastContainer = document.createElement('div');
@@ -476,6 +542,28 @@ unset($_SESSION['alert_type']);
                             btn.disabled = false;
                             showToast('An error occurred while cancelling the appointment', 'danger');
                         });
+                }
+            });
+        });
+
+        // Delete availability modal logic (like manage_products.php)
+        document.querySelectorAll('.delete-availability-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var day = this.getAttribute('data-day');
+                document.getElementById('availabilityDay').textContent = day;
+                // Store the button reference for later
+                document.getElementById('confirmDeleteAvailabilityBtn').setAttribute('data-day', day);
+                var modal = new bootstrap.Modal(document.getElementById('deleteAvailabilityModal'));
+                modal.show();
+            });
+        });
+
+        document.getElementById('confirmDeleteAvailabilityBtn').addEventListener('click', function() {
+            var day = this.getAttribute('data-day');
+            // Find the corresponding hidden form and submit it
+            document.querySelectorAll('.delete-availability-form').forEach(function(form) {
+                if (form.querySelector('input[name="delete_day"]').value === day) {
+                    form.submit();
                 }
             });
         });

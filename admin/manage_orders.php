@@ -48,11 +48,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_order_status"])
     $current_status_stmt->execute();
     $current_status_result = $current_status_stmt->get_result();
     $send_mail = false;
+    $block_update = false;
     if ($current_status_result && $current_status_result->num_rows > 0) {
         $row = $current_status_result->fetch_assoc();
+        // Prevent update if already Delivered or Cancelled
+        if ($row['status'] === 'Delivered' || $row['status'] === 'Cancelled') {
+            $block_update = true;
+        }
         if ($row['status'] !== $status) {
             $send_mail = true;
         }
+    }
+
+    if ($block_update) {
+        $_SESSION['alert_message'] = "Cannot change status. Order is already '{$row['status']}'.";
+        $_SESSION['alert_type'] = "warning";
+        header("Location: manage_orders.php");
+        exit();
     }
 
     // Prepare the update query
@@ -254,13 +266,19 @@ if (isset($_GET["delete_order"])) {
                                     <form method="POST" class="d-inline">
                                         <input type="hidden" name="update_order_status" value="1">
                                         <input type="hidden" name="order_id" value="<?= $order['order_id']; ?>">
-                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                        <?php
+                                        $is_final = ($order['status'] === 'Delivered' || $order['status'] === 'Cancelled');
+                                        ?>
+                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()" <?= $is_final ? 'disabled' : '' ?>>
                                             <option value="Pending" <?= $order['status'] == 'Pending' ? 'selected' : ''; ?>>Pending</option>
                                             <option value="Processing" <?= $order['status'] == 'Processing' ? 'selected' : ''; ?>>Processing</option>
                                             <option value="Shipped" <?= $order['status'] == 'Shipped' ? 'selected' : ''; ?>>Shipped</option>
                                             <option value="Delivered" <?= $order['status'] == 'Delivered' ? 'selected' : ''; ?>>Delivered</option>
                                             <option value="Cancelled" <?= $order['status'] == 'Cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                                         </select>
+                                        <?php if ($is_final): ?>
+                                            <div class="small text-muted mt-1">Status cannot be changed</div>
+                                        <?php endif; ?>
                                     </form>
                                 </td>
                                 <td class="text-center">

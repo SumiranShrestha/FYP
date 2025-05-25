@@ -23,6 +23,6 @@ if (isset($_GET['id'])) {
     }
 }
 
-header("Location: view_doctors.php");
+header("Location: manage_doctor.php");
 exit();
 ?>

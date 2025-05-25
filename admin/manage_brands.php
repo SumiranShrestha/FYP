@@ -68,7 +68,7 @@ if (isset($_GET['delete_brand'])) {
     exit();
 }
 ?>
-vi<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -78,18 +78,17 @@ vi<!DOCTYPE html>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 <body>
-
-<!-- Navbar --> 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <!-- Navbar Header (full width, consistent with other admin pages) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Shady Shades Admin</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link " href="#">Dashboard</a>
+                        <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="manage_users.php">Users</a>
@@ -101,11 +100,17 @@ vi<!DOCTYPE html>
                         <a class="nav-link" href="manage_orders.php">Orders</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="manage_prescription_orders.php">Prescription Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="manage_brands.php">Brands</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="manage_doctors.php">Doctors</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center">
-                    <span class="text-light me-3">Welcome, <?php echo htmlspecialchars($_SESSION["admin_username"]); ?></span>
+                    <span class="text-light me-3">Welcome, <?= htmlspecialchars($_SESSION["admin_username"]); ?></span>
                     <!-- Logout button triggers modal -->
                     <button id="logoutBtn" class="btn btn-outline-light btn-sm">
                         <i class="bi bi-box-arrow-right me-1"></i>Logout
@@ -114,7 +119,7 @@ vi<!DOCTYPE html>
             </div>
         </div>
     </nav>
-
+    <!-- End Navbar Header -->
 
 <div class="container my-4">
     <h2>Manage Brands</h2>
