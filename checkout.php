@@ -608,3 +608,30 @@ $purchase_order_name = 'Shady Shades Order';
 
 </body>
 </html>
+
+<?php
+// After inserting order and order items:
+$conn->begin_transaction();
+
+try {
+    // For each product in the order, decrement stock
+    foreach ($cart_items as $item) {
+        $product_id = $item['product_id'];
+        $quantity = $item['quantity'];
+        $updateStockStmt = $conn->prepare("UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?");
+        $updateStockStmt->bind_param("iii", $quantity, $product_id, $quantity);
+        $updateStockStmt->execute();
+
+        // Optional: check if stock was updated (i.e., not negative)
+        if ($updateStockStmt->affected_rows === 0) {
+            throw new Exception("Insufficient stock for product ID $product_id");
+        }
+    }
+
+    $conn->commit();
+    // ...existing code for success (e.g., redirect, show confirmation)...
+} catch (Exception $e) {
+    $conn->rollback();
+    // Handle error (e.g., show error message, do not place order)
+    echo "Order failed: " . $e->getMessage();
+}

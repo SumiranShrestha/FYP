@@ -185,11 +185,6 @@ $conn->close();
                                             <i class="bi bi-bandaid"></i> <?= htmlspecialchars($appointment['specialization']) ?>
                                         </p>
                                     </div>
-                                    <span class="badge bg-<?=
-                                                            $appointment['status'] === 'pending' ? 'warning' : ($appointment['status'] === 'confirmed' ? 'success' : ($appointment['status'] === 'cancelled' ? 'danger' : 'info'))
-                                                            ?>">
-                                        <?= ucfirst($appointment['status']) ?>
-                                    </span>
                                 </div>
 
                                 <hr>
@@ -209,15 +204,15 @@ $conn->close();
                                     <?php if ($appointment['status'] == 'pending' || $appointment['status'] == 'confirmed'): ?>
                                         <button class="btn btn-outline-danger btn-sm cancel-btn"
                                             data-appointment-id="<?= $appointment['id'] ?>">
-                                            <i class="bi bi-x-circle"></i> Cancel
+                                            Cancel
                                         </button>
                                     <?php elseif ($appointment['status'] == 'cancelled'): ?>
                                         <button class="btn btn-outline-danger btn-sm" disabled>
-                                            <i class="bi bi-slash-circle"></i> Cancelled
+                                            Cancelled
                                         </button>
                                     <?php elseif ($appointment['status'] == 'completed'): ?>
                                         <button class="btn btn-outline-secondary btn-sm" disabled>
-                                            <i class="bi bi-check-circle"></i> Completed
+                                            Completed
                                         </button>
                                     <?php endif; ?>
                                 </div>

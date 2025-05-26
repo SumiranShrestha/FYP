@@ -51,6 +51,18 @@ $appointments = $appointments_stmt->get_result();
             background-color: #E673DE !important; 
             color: #fff !important; 
         }
+        /* Prescription box style */
+        .prescription-content-box {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f8f9fa;
+            padding: 16px;
+            margin-bottom: 0;
+            font-size: 1rem;
+            word-break: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -177,7 +189,7 @@ $appointments = $appointments_stmt->get_result();
             button.addEventListener('click', function() {
                 const prescription = this.getAttribute('data-prescription');
                 document.getElementById('prescriptionContent').innerHTML = 
-                    '<div class="prescription-content">' + 
+                    '<div class="prescription-content-box">' + 
                     prescription.replace(/\n/g, '<br>') + 
                     '</div>';
                 const modal = new bootstrap.Modal(document.getElementById('prescriptionModal'));

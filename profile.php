@@ -382,6 +382,19 @@ unset($_SESSION['alert_type']);
                                                         </td>
                                                         <td>
                                                             <a href="view_order.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                                            <?php if ($status === 'Pending'): ?>
+                                                                <button class="btn btn-sm btn-outline-danger cancel-order-btn" data-order-id="<?= $order['id'] ?>">
+                                                                    Cancel
+                                                                </button>
+                                                            <?php elseif ($status === 'Cancelled'): ?>
+                                                                <button class="btn btn-sm btn-outline-danger" disabled>
+                                                                    Cancelled
+                                                                </button>
+                                                            <?php elseif ($status === 'Delivered'): ?>
+                                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                                    Delivered
+                                                                </button>
+                                                            <?php endif; ?>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
@@ -429,20 +442,20 @@ unset($_SESSION['alert_type']);
                                                                 : 'my_appointments.php';
                                                             ?>
                                                             <a href="<?= $detailPage ?>?id=<?= $appointment['id'] ?>" class="btn btn-sm btn-outline-primary">
-                                                                <i class="bi bi-eye"></i> View
+                                                                View
                                                             </a>
                                                             <?php if ($appointment['status'] === 'pending' || $appointment['status'] === 'confirmed'): ?>
                                                                 <button class="btn btn-sm btn-outline-danger cancel-btn"
                                                                     data-appointment-id="<?= $appointment['id'] ?>">
-                                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                                    Cancel
                                                                 </button>
                                                             <?php elseif ($appointment['status'] == 'cancelled'): ?>
                                                                 <button class="btn btn-sm btn-outline-danger" disabled>
-                                                                    <i class="bi bi-slash-circle"></i> Cancelled
+                                                                    Cancelled
                                                                 </button>
                                                             <?php elseif ($appointment['status'] == 'completed'): ?>
                                                                 <button class="btn btn-sm btn-outline-secondary" disabled>
-                                                                    <i class="bi bi-check-circle"></i> Completed
+                                                                    Completed
                                                                 </button>
                                                             <?php endif; ?>
                                                         </td>
@@ -645,6 +658,58 @@ unset($_SESSION['alert_type']);
                     this.setCustomValidity('');
                 });
             }
+        });
+
+        // Handle order cancel button clicks
+        document.querySelectorAll('.cancel-order-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                let btn = this;
+                let orderId = btn.getAttribute('data-order-id');
+                if (!orderId || isNaN(orderId)) {
+                    showToast('Invalid order selected. Please refresh the page and try again.', 'danger');
+                    return;
+                }
+                let row = btn.closest('tr');
+                let originalButtonHTML = btn.innerHTML;
+
+                if (confirm("Are you sure you want to cancel this order?")) {
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Cancelling...';
+                    btn.disabled = true;
+
+                    fetch('server/cancel_order.php?id=' + encodeURIComponent(orderId), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            // Update the row appearance
+                            row.querySelector('.badge').className = 'badge bg-danger';
+                            row.querySelector('.badge').textContent = 'Cancelled';
+                            btn.remove();
+                            // Add cancelled button
+                            const cancelledBtn = document.createElement('button');
+                            cancelledBtn.className = 'btn btn-sm btn-outline-danger';
+                            cancelledBtn.disabled = true;
+                            cancelledBtn.innerHTML = 'Cancelled';
+                            row.querySelector('td:last-child').appendChild(cancelledBtn);
+                        } else {
+                            btn.innerHTML = originalButtonHTML;
+                            btn.disabled = false;
+                            showToast(data.message, 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        btn.innerHTML = originalButtonHTML;
+                        btn.disabled = false;
+                        showToast('An error occurred while cancelling the order', 'danger');
+                    });
+                }
+            });
         });
     </script>
 </body>

@@ -128,7 +128,10 @@ while ($row = $order_items_result->fetch_assoc()) {
                     // For example: echo htmlspecialchars($item['description'] ?? ''); 
                   ?>
                 </td>
-                <td><?= htmlspecialchars($item['quantity']); ?></td>
+                <td>
+                  <?= htmlspecialchars($item['quantity']); // This should display the actual quantity ordered ?>
+                  <?php // echo '<!-- DEBUG: ' . print_r($item, true) . ' -->'; ?>
+                </td>
                 <td>Rs <?= number_format($item['price'], 2); ?></td>
                 <td>Rs <?= number_format($item['quantity'] * $item['price'], 2); ?></td>
               </tr>

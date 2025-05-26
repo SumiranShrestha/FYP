@@ -58,12 +58,20 @@ $appointments = $stmt->get_result();
                                     <td><?= htmlspecialchars($appointment['user_name']); ?></td>
                                     <td><?= date('M j, Y h:i A', strtotime($appointment['appointment_date'])); ?></td>
                                     <td>
-                                        <span class="badge bg-<?=
-                                            $appointment['status'] === 'pending' ? 'warning' : 
-                                            ($appointment['status'] === 'confirmed' ? 'success' : 
-                                            ($appointment['status'] === 'completed' ? 'info' : 'secondary'))
-                                        ?>">
-                                            <?= ucfirst($appointment['status']); ?>
+                                        <?php
+                                            // Map status to Bootstrap badge color
+                                            $statusColors = [
+                                                'pending' => 'warning',
+                                                'confirmed' => 'success',
+                                                'completed' => 'info',
+                                                'cancelled' => 'danger',
+                                                // add more statuses if needed
+                                            ];
+                                            $status = $appointment['status'];
+                                            $badgeColor = $statusColors[$status] ?? 'secondary';
+                                        ?>
+                                        <span class="badge bg-<?= $badgeColor ?>">
+                                            <?= ucfirst($status); ?>
                                         </span>
                                     </td>
                                     <td>

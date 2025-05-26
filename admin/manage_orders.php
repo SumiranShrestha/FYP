@@ -72,6 +72,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_order_status"])
     $stmt->bind_param("si", $status, $order_id);
 
     if ($stmt->execute()) {
+        // Restock products if status changed to Cancelled
+        if ($status === "Cancelled") {
+            $items_stmt = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+            $items_stmt->bind_param("i", $order_id);
+            $items_stmt->execute();
+            $items_result = $items_stmt->get_result();
+            while ($item = $items_result->fetch_assoc()) {
+                $update_stock_stmt = $conn->prepare("UPDATE products SET stock = stock + ? WHERE id = ?");
+                $update_stock_stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+                $update_stock_stmt->execute();
+                $update_stock_stmt->close();
+            }
+            $items_stmt->close();
+        }
+
         if ($send_mail) {
             // Fetch user email and name for this order
             $user_stmt = $conn->prepare("SELECT u.user_email, u.user_name FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?");
@@ -121,6 +136,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["update_order_status"])
 // Handle Order Deletion
 if (isset($_GET["delete_order"])) {
     $order_id = $_GET["delete_order"];
+
+    // Restock products before deleting the order
+    $items_stmt = $conn->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+    $items_stmt->bind_param("i", $order_id);
+    $items_stmt->execute();
+    $items_result = $items_stmt->get_result();
+    while ($item = $items_result->fetch_assoc()) {
+        $update_stock_stmt = $conn->prepare("UPDATE products SET stock = stock + ? WHERE id = ?");
+        $update_stock_stmt->bind_param("ii", $item['quantity'], $item['product_id']);
+        $update_stock_stmt->execute();
+        $update_stock_stmt->close();
+    }
+    $items_stmt->close();
+
     $stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
     $stmt->bind_param("i", $order_id);
 

@@ -2,6 +2,13 @@
 include('header.php');
 include('server/connection.php'); // Database connection
 
+// Get min/max price from DB for slider
+$price_range_query = "SELECT MIN(discount_price) as min_price, MAX(discount_price) as max_price FROM products";
+$price_range_result = mysqli_query($conn, $price_range_query);
+$price_range = mysqli_fetch_assoc($price_range_result);
+$db_min_price = (int) $price_range['min_price'];
+$db_max_price = (int) $price_range['max_price'];
+
 // Get selected brand filter (Always as an array)
 $selected_brands = isset($_GET['brand_id']) ? (array)$_GET['brand_id'] : [];
 
@@ -9,8 +16,8 @@ $selected_brands = isset($_GET['brand_id']) ? (array)$_GET['brand_id'] : [];
 $selected_face_shapes = isset($_GET['face_shape']) ? (array)$_GET['face_shape'] : [];
 
 // Get selected price filter
-$min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : '';
-$max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : '';
+$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : $db_min_price;
+$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : $db_max_price;
 
 // Get search query
 $search_query = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -39,12 +46,11 @@ if (!empty($selected_face_shapes) && !in_array('all', $selected_face_shapes)) {
     }
 }
 
-if (!empty($min_price)) {
-    $query .= " AND products.price >= $min_price";
+if (!empty($min_price) || $min_price === 0) {
+    $query .= " AND products.discount_price >= $min_price";
 }
-
-if (!empty($max_price)) {
-    $query .= " AND products.price <= $max_price";
+if (!empty($max_price) || $max_price === 0) {
+    $query .= " AND products.discount_price <= $max_price";
 }
 
 // Enhanced search with flexible pattern matching
@@ -83,7 +89,7 @@ $total_products = mysqli_num_rows($result);
     <h2 class="text-center mb-4">All Products <?= !empty($search_query) ? ' - Search Results' : '' ?></h2>
 
     <!-- Search and Filter Summary -->
-    <?php if (!empty($search_query) || (!empty($selected_brands) && !in_array('all', $selected_brands)) || !empty($min_price) || !empty($max_price) || (!empty($selected_face_shapes) && !in_array('all', $selected_face_shapes))): ?>
+    <?php if (!empty($search_query) || (!empty($selected_brands) && !in_array('all', $selected_brands)) || $min_price != $db_min_price || $max_price != $db_max_price || (!empty($selected_face_shapes) && !in_array('all', $selected_face_shapes))): ?>
         <div class="alert alert-info mb-4">
             <?php if (!empty($search_query)): ?>
                 <p><strong>Search:</strong> "<?= htmlspecialchars($search_query) ?>"</p>
@@ -119,11 +125,11 @@ $total_products = mysqli_num_rows($result);
                     ?>
                 </p>
             <?php endif; ?>
-            <?php if (!empty($min_price) || !empty($max_price)): ?>
+            <?php if ($min_price != $db_min_price || $max_price != $db_max_price): ?>
                 <p><strong>Price Range:</strong>
-                    Rs <?= !empty($min_price) ? number_format($min_price) : '0' ?>
+                    Rs <?= number_format($min_price) ?>
                     -
-                    Rs <?= !empty($max_price) ? number_format($max_price) : 'Any' ?>
+                    Rs <?= number_format($max_price) ?>
                 </p>
             <?php endif; ?>
         </div>
@@ -217,19 +223,34 @@ $total_products = mysqli_num_rows($result);
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title">Filter By Price</h5>
-                        <label for="price_range" class="form-label">Price Range</label>
-                        <input type="range" id="price_range" class="form-range" min="0" max="10000" step="100" value="<?= $min_price ? $min_price : 0 ?>" onchange="updatePriceRange()">
-                        <div class="d-flex justify-content-between">
-                            <span id="min_value">Rs <?= number_format($min_price ? $min_price : 0) ?></span>
-                            <span id="max_value">Rs <?= number_format($max_price ? $max_price : 10000) ?></span>
+                        <label for="price_range_min" class="form-label">Price Range</label>
+                        <div class="d-flex align-items-center mb-2">
+                            <input type="range" id="price_range_min" class="form-range me-2"
+                                min="<?= $db_min_price ?>"
+                                max="<?= $db_max_price ?>"
+                                step="100"
+                                value="<?= $min_price ?>"
+                                onchange="updatePriceRange()"
+                                oninput="updatePriceRange()">
+                            <input type="range" id="price_range_max" class="form-range ms-2"
+                                min="<?= $db_min_price ?>"
+                                max="<?= $db_max_price ?>"
+                                step="100"
+                                value="<?= $max_price ?>"
+                                onchange="updatePriceRange()"
+                                oninput="updatePriceRange()">
                         </div>
-                        <input type="hidden" name="min_price" id="min_price" value="<?= $min_price ? $min_price : 0 ?>">
-                        <input type="hidden" name="max_price" id="max_price" value="<?= $max_price ? $max_price : 10000 ?>">
+                        <div class="d-flex justify-content-between">
+                            <span id="min_value">Rs <?= number_format($min_price) ?></span>
+                            <span id="max_value">Rs <?= number_format($max_price) ?></span>
+                        </div>
+                        <input type="hidden" name="min_price" id="min_price" value="<?= $min_price ?>">
+                        <input type="hidden" name="max_price" id="max_price" value="<?= $max_price ?>">
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-                <?php if (!empty($selected_brands) || !empty($min_price) || !empty($max_price) || !empty($search_query) || !empty($selected_face_shapes)): ?>
+                <?php if (!empty($selected_brands) || $min_price != $db_min_price || $max_price != $db_max_price || !empty($search_query) || !empty($selected_face_shapes)): ?>
                     <a href="products.php" class="btn btn-outline-secondary w-100 mt-2">Reset All Filters</a>
                 <?php endif; ?>
             </form>
@@ -364,22 +385,35 @@ $total_products = mysqli_num_rows($result);
 </style>
 
 <script>
-    // Update the price range values
     function updatePriceRange() {
-        var range = document.getElementById('price_range');
+        var minRange = document.getElementById('price_range_min');
+        var maxRange = document.getElementById('price_range_max');
         var min_value = document.getElementById('min_value');
         var max_value = document.getElementById('max_value');
         var min_price = document.getElementById('min_price');
         var max_price = document.getElementById('max_price');
+        var dbMin = <?= $db_min_price ?>;
+        var dbMax = <?= $db_max_price ?>;
 
-        var price_value = range.value;
-        min_value.textContent = "Rs " + price_value;
-        min_price.value = price_value;
-        max_value.textContent = "Rs " + (parseInt(price_value) + 10000);
-        max_price.value = parseInt(price_value) + 10000;
+        var minVal = parseInt(minRange.value);
+        var maxVal = parseInt(maxRange.value);
+
+        // Prevent crossing
+        if (minVal > maxVal) {
+            minVal = maxVal;
+            minRange.value = minVal;
+        }
+        if (maxVal < minVal) {
+            maxVal = minVal;
+            maxRange.value = maxVal;
+        }
+
+        min_value.textContent = "Rs " + minVal.toLocaleString();
+        max_value.textContent = "Rs " + maxVal.toLocaleString();
+        min_price.value = minVal;
+        max_price.value = maxVal;
     }
 
-    // Initialize price range display
     document.addEventListener('DOMContentLoaded', function() {
         updatePriceRange();
 
